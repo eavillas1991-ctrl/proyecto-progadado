@@ -1,0 +1,56 @@
+/* Identidad visual y fotografías aportadas por el usuario. */
+.brand{background:#fff;border-radius:13px;padding:14px 14px;line-height:0;box-shadow:0 8px 22px #071a1066}
+.brand img{width:100%;height:92px;object-fit:contain}
+.farm-name{font-size:11px;margin:10px 7px 30px}
+.welcome{position:relative;min-height:190px;overflow:hidden;padding:0;background:#183d2e;color:#fff}
+.welcome>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 46%;filter:brightness(.55)}
+.welcome:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#153a2bd9 0%,#153a2b75 55%,transparent)}
+.welcome-content{position:relative;z-index:1;padding:32px 34px;max-width:550px}
+.welcome p{color:#b2e6bd}.welcome span{color:#edf5ec}.welcome h2{font-size:31px}.welcome .primary{display:block;margin-top:19px;background:#f4cb77;color:#193b2d}
+.visual-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:20px 0}
+.visual-strip figure{position:relative;height:150px;overflow:hidden;border-radius:11px;margin:0;background:#183d2e}
+.visual-strip img{width:100%;height:100%;object-fit:cover;filter:brightness(.72)}
+.visual-strip figcaption{position:absolute;inset:auto 0 0;padding:16px 18px;width:100%;background:linear-gradient(transparent,#0e2419cc);color:#fff;font:600 13px 'DM Sans',sans-serif}
+@media(max-width:850px){.brand{position:absolute;top:10px;left:18px;width:165px;padding:3px 7px}.brand img{height:30px}.farm-name{display:none}}
+@media(max-width:540px){.welcome-content{padding:26px 22px}.welcome h2{font-size:27px}.visual-strip{grid-template-columns:1fr}}
+
+/* Dirección de arte ProGanado: interfaz editorial de alto contraste. */
+body{background:#f2f4ef;background-image:radial-gradient(#dfe6dc 1px,transparent 1px);background-size:18px 18px}
+.sidebar{background:linear-gradient(160deg,#102d20 0%,#1b5439 100%);box-shadow:9px 0 30px #13352616}
+.brand{box-shadow:0 7px 18px #071a1066;border-radius:10px}.farm-name{letter-spacing:.4px;text-transform:uppercase;color:#b5cebb}
+main{padding-top:36px}.workspace-label{font-size:9px;letter-spacing:1.5px;text-align:right;color:#779084;line-height:1.55}.workspace-label b{color:#214d38;font-size:10px;letter-spacing:.8px}
+header{padding-bottom:22px;border-bottom:1px solid #dbe2d8}.eyebrow{color:#638275;letter-spacing:1.6px}h1{font-size:34px}
+.welcome{min-height:330px;border-radius:18px;box-shadow:0 20px 35px #16362327}.welcome>img{object-position:center 49%;filter:brightness(.48) saturate(.85)}.welcome:after{background:linear-gradient(90deg,#0c2c1eeF 0%,#133a29c7 48%,#133a2917 88%)}.welcome-content{padding:47px 50px;max-width:620px}.welcome p{letter-spacing:1.7px;font-size:10px}.welcome p i{height:7px;width:7px;display:inline-block;background:#f4cb77;border-radius:50%;margin:0 7px 1px 0}.welcome h2{font-size:40px;line-height:1.08;letter-spacing:-1.2px;margin:12px 0}.welcome span{line-height:1.55;display:block;max-width:405px}.hero-actions{display:flex;align-items:center;gap:21px;margin-top:25px}.welcome .primary{margin:0;border-radius:5px;padding:13px 19px;box-shadow:0 8px 18px #061a1144}.hero-link{border:0;background:transparent;color:#fff;font:600 12px 'DM Sans',sans-serif;cursor:pointer}.hero-link b{font-size:16px;margin-left:4px}.hero-badge{position:absolute;z-index:2;right:36px;bottom:29px;padding:10px 15px;display:flex;gap:9px;align-items:center;color:#fff;border:1px solid #ffffff55;background:#123325a6;backdrop-filter:blur(6px);border-radius:7px}.hero-badge b{height:30px;width:30px;display:grid;place-items:center;border-radius:50%;background:#f4cb77;color:#183928;font:700 11px 'DM Sans',sans-serif}.hero-badge span{font:600 10px/1.25 'DM Sans',sans-serif;color:#fff}
+.metrics{gap:14px;margin-top:-3px}.metrics article{border:0;border-radius:12px;box-shadow:0 8px 20px #173a2812;transition:transform .2s,box-shadow .2s}.metrics article:hover{transform:translateY(-3px);box-shadow:0 14px 27px #173a2820}.metric-icon{border-radius:50%}.grid-two{gap:18px}.panel{border:0;box-shadow:0 8px 22px #173a280f;border-radius:13px}.activity{background:#fcfdfb}.visual-strip{grid-template-columns:.78fr 1fr 1fr;gap:16px;margin-top:22px}.gallery-intro{padding:22px 8px 15px 4px;display:flex;flex-direction:column;justify-content:center}.gallery-intro h2{font-size:25px;line-height:1.08;margin:4px 0 10px}.gallery-intro span{color:#68796f;font-size:12px;line-height:1.5}.visual-strip figure{height:192px;border-radius:13px;box-shadow:0 10px 20px #173a2822}.visual-strip figure:hover img{transform:scale(1.04)}.visual-strip img{transition:transform .45s ease;filter:brightness(.74) saturate(.88)}.visual-strip figcaption{font-size:12px;padding:28px 17px 15px}.visual-strip figcaption small{display:block;color:#f4cb77;font-size:9px;letter-spacing:1.2px;margin-bottom:4px}.primary{border-radius:6px}.secondary{border-radius:6px}
+@media(max-width:850px){.workspace-label{display:none}.brand{position:absolute;top:10px;left:16px;width:200px;padding:7px 11px}.brand img{height:48px}.welcome{min-height:280px}.welcome-content{padding:37px 32px}.welcome h2{font-size:34px}.visual-strip{grid-template-columns:1fr 1fr}.gallery-intro{grid-column:1 / -1;padding:8px 0}.gallery-intro h2 br{display:none}}
+@media(max-width:540px){main{padding:24px 16px 50px}.brand{top:8px;left:14px;width:180px;padding:6px 9px}.brand img{height:42px}.welcome{min-height:340px}.welcome-content{padding:35px 22px}.welcome h2{font-size:31px}.hero-badge{right:18px;bottom:17px}.hero-actions{gap:12px}.visual-strip{grid-template-columns:1fr}.visual-strip figure{height:175px}.workspace-label{display:none}}
+
+/* Fotografías específicas para los módulos operativos. */
+#salud .health-cards{position:relative;overflow:hidden;border-radius:13px;padding:18px 20px;background:linear-gradient(90deg,#123426ed 0%,#123426a3 52%,#12342625),url('assets/salud-establo.jpg') center 44%/cover}.health-cards .health-card{position:relative;z-index:1;background:#fffffff2;box-shadow:0 9px 20px #071f1530}
+#reproduccion .metrics{position:relative;overflow:hidden;border-radius:13px;padding:18px 20px;background:linear-gradient(90deg,#123426ed 0%,#1234269b 58%,#12342620),url('assets/reproduccion-pastura.jpg') center 52%/cover}.metrics article{position:relative;z-index:1}
+#movimientos>.panel{position:relative;overflow:hidden;background:linear-gradient(90deg,#ffffff 0%,#ffffffea 60%,#ffffff30),url('assets/movimientos-establo.jpg') right center/cover}.metrics:has(.metric-icon){isolation:isolate}
+
+/* Galería de la finca y fotos por módulo. */
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.photo-grid figure{margin:0;position:relative;height:150px;overflow:hidden;border-radius:10px;background:#183d2e}
+.photo-grid img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+.photo-grid figure:hover img{transform:scale(1.06)}
+.photo-grid figcaption{position:absolute;inset:auto 0 0;padding:24px 13px 10px;width:100%;background:linear-gradient(transparent,#0e2419cc);color:#fff;font:600 12px 'DM Sans',sans-serif}
+.gallery-panel{margin-top:20px}.gallery-panel .panel-heading{margin-bottom:14px}
+
+#ganado .page-top.banner{position:relative;border-radius:13px;padding:24px 26px;margin-bottom:20px;background:linear-gradient(90deg,#123426f2 0%,#123426c9 46%,#12342640 90%),url('assets/foto-ternero-2.jpg') center 40%/cover;color:#fff}
+#ganado .banner .eyebrow{color:#9fd8ad}
+#ganado .banner h2{color:#fff}
+#ganado .banner span{color:#dcebdd}
+#ganado .toolbar{margin-top:18px}
+
+.births-panel{margin-bottom:20px}
+.births-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.births-grid figure{margin:0;position:relative;height:205px;overflow:hidden;border-radius:11px;background:#183d2e}
+.births-grid img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
+.births-grid figcaption{position:absolute;inset:auto 0 0;padding:28px 15px 12px;width:100%;background:linear-gradient(transparent,#0e2419e6);color:#fff}
+.births-grid strong{display:block;font-size:14px}
+.births-grid small{color:#cfe4d2;font-size:11px}
+
+@media(max-width:850px){.photo-grid{grid-template-columns:repeat(2,1fr)}.births-grid{grid-template-columns:repeat(2,1fr)}.births-grid figure{height:175px}}
+@media(max-width:540px){.photo-grid{grid-template-columns:1fr}.photo-grid figure{height:175px}.births-grid{grid-template-columns:1fr}.births-grid figure{height:215px}.visual-strip figure{height:175px}}
