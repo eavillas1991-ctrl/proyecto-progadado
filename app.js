@@ -33,7 +33,7 @@ function completarHato(lista, razasRot, potesRot) {
     if (año >= 2026) estado = 'Ternera';
     else if (año === 2025) estado = 'Novilla Vientre';
     else estado = n % 5 === 0 ? 'Horra Seca' : 'En Ordeño';
-    lista.push({ id_bovino: 'bov_' + tag, name: 'Vaca ' + tag, tag: tag, id_raza: razasRot[n % razasRot.length], sexo: 'Hembra', estado: estado, id_potrero: potesRot[n % potesRot.length], birth: año + '-' + mes + '-' + dia, marca: 'Arete ICA ' + tag, foto: 'assets/ganado/vaca_' + tag + '.jpg' });
+    lista.push({ id_bovino: 'bov_' + tag, name: '', tag: tag, id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_' + tag + '.jpg' });
   }
   return lista;
 }
@@ -55,49 +55,30 @@ function seed() {
       { id_potrero: potEste, nombre_potrero: 'Potrero Este', dias_ocupacion: 2, dias_descanso_prv: 30, estado: 'Libre', desde: null }
     ],
     bovinos: (() => { const l = [
-      // 12 vacas REALES del hato (fotos de assets/ganado/, aretes del registro de la finca)
-      { id_bovino: 'bov_1074', name: 'Vaca 1074', tag: '1074', id_raza: razaGyr, sexo: 'Hembra', estado: 'En Ordeño', id_potrero: potNorte, birth: '2021-06-18', marca: 'Arete ICA 1074', foto: 'assets/ganado/vaca_1074.jpg' },
-      { id_bovino: 'bov_1075', name: 'Vaca 1075', tag: '1075', id_raza: razaHolstein, sexo: 'Hembra', estado: 'En Ordeño', id_potrero: potNorte, birth: '2022-02-03', marca: 'Arete ICA 1075', foto: 'assets/ganado/vaca_1075.jpg' },
-      { id_bovino: 'bov_1078', name: 'Vaca 1078', tag: '1078', id_raza: razaHolstein, sexo: 'Hembra', estado: 'En Ordeño', id_potrero: potSur, birth: '2020-11-24', marca: 'Arete ICA 1078', foto: 'assets/ganado/vaca_1078.jpg' },
-      { id_bovino: 'bov_1095', name: 'Vaca 1095', tag: '1095', id_raza: razaSim, sexo: 'Hembra', estado: 'En Ordeño', id_potrero: potSur, birth: '2020-03-15', marca: 'Arete ICA 1095', foto: 'assets/ganado/vaca_1095.jpg' },
-      { id_bovino: 'bov_1106', name: 'Vaca 1106', tag: '1106', id_raza: razaGyr, sexo: 'Hembra', estado: 'En Ordeño', id_potrero: potNorte, birth: '2022-07-28', marca: 'Arete ICA 1106', foto: 'assets/ganado/vaca_1106.jpg' },
-      { id_bovino: 'bov_1151', name: 'Vaca 1151', tag: '1151', id_raza: razaBrahman, sexo: 'Hembra', estado: 'Horra Seca', id_potrero: potEste, birth: '2020-10-02', marca: 'Arete ICA 1151', foto: 'assets/ganado/vaca_1151.jpg' },
-      { id_bovino: 'bov_1153', name: 'Vaca 1153', tag: '1153', id_raza: razaHolstein, sexo: 'Hembra', estado: 'En Ordeño', id_potrero: potSur, birth: '2023-01-12', marca: 'Arete ICA 1153', foto: 'assets/ganado/vaca_1153.jpg' },
-      { id_bovino: 'bov_1162', name: 'Vaca 1162', tag: '1162', id_raza: razaGyr, sexo: 'Hembra', estado: 'Novilla Vientre', id_potrero: potEste, birth: '2024-09-14', marca: 'Arete ICA 1162', foto: 'assets/ganado/vaca_1162.jpg' },
-      { id_bovino: 'bov_1164', name: 'Vaca 1164', tag: '1164', id_raza: razaHolstein, sexo: 'Hembra', estado: 'En Ordeño', id_potrero: potNorte, birth: '2021-11-08', marca: 'Arete ICA 1164', foto: 'assets/ganado/vaca_1164.jpg' },
-      { id_bovino: 'bov_1172', name: 'Vaca 1172', tag: '1172', id_raza: razaSim, sexo: 'Hembra', estado: 'En Ordeño', id_potrero: potSur, birth: '2022-05-21', marca: 'Arete ICA 1172', foto: 'assets/ganado/vaca_1172.jpg' },
-      { id_bovino: 'bov_635', name: 'Vaca 635', tag: '635', id_raza: razaBrahman, sexo: 'Macho', estado: 'Toro', id_potrero: potEste, birth: '2019-05-11', marca: 'Arete SINIGAN 635', foto: 'assets/ganado/vaca_635.jpg' },
-      { id_bovino: 'bov_1201', name: 'Vaca 1201', tag: '1201', id_raza: razaGyr, sexo: 'Hembra', estado: 'Ternera', id_potrero: potNorte, birth: '2026-04-19', marca: 'Arete ICA 1201', foto: 'assets/ganado/vaca_1201.jpg' }
-    ]; return completarHato(l, [razaGyr, razaHolstein, razaBrahman, razaSim], [potNorte, potSur, potEste]); })(),
+      // Bancas registradas: solo numero de identificacion, demas datos se cargan despues
+      { id_bovino: 'bov_1074', name: '', tag: '1074', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1074.jpg' },
+      { id_bovino: 'bov_1075', name: '', tag: '1075', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1075.jpg' },
+      { id_bovino: 'bov_1078', name: '', tag: '1078', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1078.jpg' },
+      { id_bovino: 'bov_1095', name: '', tag: '1095', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1095.jpg' },
+      { id_bovino: 'bov_1106', name: '', tag: '1106', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1106.jpg' },
+      { id_bovino: 'bov_1151', name: '', tag: '1151', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1151.jpg' },
+      { id_bovino: 'bov_1153', name: '', tag: '1153', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1153.jpg' },
+      { id_bovino: 'bov_1162', name: '', tag: '1162', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1162.jpg' },
+      { id_bovino: 'bov_1164', name: '', tag: '1164', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1164.jpg' },
+      { id_bovino: 'bov_1172', name: '', tag: '1172', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1172.jpg' },
+      { id_bovino: 'bov_635', name: '', tag: '635', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_635.jpg' },
+      { id_bovino: 'bov_1201', name: '', tag: '1201', id_raza: '', sexo: '', estado: '', id_potrero: '', birth: '', marca: '', foto: 'assets/ganado/vaca_1201.jpg' }
+    ]; return completarHato(l, [], []); })(),
     medicamentos: [
       { id_medicamento: medAftosa, nombre_farmaco: 'Vacuna Aftosa', dias_retiro_ica: 0 },
       { id_medicamento: medOxi, nombre_farmaco: 'Oxitetraciclina LA', dias_retiro_ica: 6 },
       { id_medicamento: medDesp, nombre_farmaco: 'Ivermectina 1%', dias_retiro_ica: 8 }
     ],
-    tratamientos: [
-      { id_tratamiento: 'trat_1', id_bovino: 'bov_1075', id_medicamento: medOxi, tipo_procedimiento: 'Tratamiento mastitis', fecha_tratamiento: diasAtras(1), dosis_ml: 15, nota: 'Cuarto trasero izquierdo' },
-      { id_tratamiento: 'trat_2', id_bovino: 'bov_1201', id_medicamento: medDesp, tipo_procedimiento: 'Desparasitación', fecha_tratamiento: diasAtras(5), dosis_ml: 4, nota: '' },
-      { id_tratamiento: 'trat_3', id_bovino: 'bov_1074', id_medicamento: medAftosa, tipo_procedimiento: 'Vacunación', fecha_tratamiento: diasAtras(40), dosis_ml: 2, nota: 'Ciclo anual' }
-    ],
-    eventos: [
-      { id_evento: 'ev_1', id_bovino: 'bov_1074', tipo_evento: 'Parto', fecha_evento: '2026-04-19', dias_abiertos_calc: null, nota: 'Ternera de la 1074' },
-      { id_evento: 'ev_2', id_bovino: 'bov_1106', tipo_evento: 'Inseminación', fecha_evento: diasAtras(80), dias_abiertos_calc: 80, nota: 'Semen Gyr' },
-      { id_evento: 'ev_3', id_bovino: 'bov_1153', tipo_evento: 'Celo Observable', fecha_evento: diasAtras(6), dias_abiertos_calc: null, nota: '' },
-      { id_evento: 'ev_4', id_bovino: 'bov_1075', tipo_evento: 'Inseminación', fecha_evento: diasAtras(30), dias_abiertos_calc: 30, nota: '' }
-    ],
-    pesajes: [
-      { id_pesaje: 'pes_1', id_bovino: 'bov_1074', fecha_pesaje: hoy(), hora_pesaje: '06:10', litros_obtenidos: 13.2 },
-      { id_pesaje: 'pes_2', id_bovino: 'bov_1078', fecha_pesaje: hoy(), hora_pesaje: '06:25', litros_obtenidos: 14.8 },
-      { id_pesaje: 'pes_3', id_bovino: 'bov_1106', fecha_pesaje: hoy(), hora_pesaje: '06:40', litros_obtenidos: 11.5 },
-      { id_pesaje: 'pes_4', id_bovino: 'bov_1153', fecha_pesaje: diasAtras(1), hora_pesaje: '06:15', litros_obtenidos: 12.4 },
-      { id_pesaje: 'pes_5', id_bovino: 'bov_1075', fecha_pesaje: diasAtras(2), hora_pesaje: '06:20', litros_obtenidos: 10.9 }
-    ],
-    entregas: [
-      { id_entrega: 'ent_1', fecha_entrega: diasAtras(2), litros_totales: 391, valor_bruto_est: 893000, recuento_ufc: 80000 }
-    ],
-    movimientos: [
-      { id_mov: 'mov_1', id_potrero: potNorte, accion: 'Entrada', fecha: diasAtras(1), cantidad: 5 }
-    ]
+    tratamientos: [],
+    eventos: [],
+    pesajes: [],
+    entregas: [],
+    movimientos: []
   };
 }
 function diasAtras(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); }

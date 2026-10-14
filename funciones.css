@@ -11,7 +11,7 @@
 .panel table td .badge{display:inline-block}
 .table-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
 .table-toolbar h2{margin:0}
-.mini-btn{border:1px solid #d8ded9;background:#fff;border-radius:6px;padding:7px 12px;font:600 12px 'DM Sans',sans-serif;color:#315a46;cursor:pointer}
+.mini-btn{border:1px solid #d8ded9;background:#fff;border-radius:6px;padding:7px 12px;font:600 12px 'Playfair Display',serif;color:#315a46;cursor:pointer}
 .mini-btn:hover{border-color:#1e6b4d;color:#155238}
 .mini-btn.danger:hover{border-color:#b44838;color:#b44838;background:#fbe4e0}
 .section-eyebrow{margin:30px 0 12px}
