@@ -1,0 +1,108 @@
+/* ============================================================
+   ProGanado — Estilo moderno de la pantalla de inicio
+   Traducción de las reglas externas a los selectores reales:
+     .form-control  -> #loginView .login-field input
+     .btn-entrar    -> #btnLogin
+     .titulo-login  -> #loginView h1 / .login-hero h2
+   Todo queda limitado a #loginView para no alterar el panel
+   ni los formularios de los diálogos (fondo blanco).
+   ============================================================ */
+
+/* ---------- Fuentes locales (no rompe la CSP font-src 'self') ---------- */
+@font-face {
+  font-family: 'Inter';
+  src: url('assets/fonts/inter-400.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('assets/fonts/inter-600.woff2') format('woff2');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('assets/fonts/montserrat-600.woff2') format('woff2');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('assets/fonts/montserrat-700.woff2') format('woff2');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+
+/* ---------- Fuente general de la pantalla de login ---------- */
+#loginView {
+  font-family: 'Inter', sans-serif;
+  color: #ffffff;
+}
+
+/* ---------- Títulos principales: Montserrat sin sombras pesadas ---------- */
+#loginView h1,
+#loginView h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+}
+
+/* Etiquetas de los campos: mismas sombras eliminadas */
+#loginView .login-field label {
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+}
+
+/* ---------- Subtítulos y textos de apoyo ---------- */
+#loginView p {
+  font-family: 'Inter', sans-serif;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+#loginView .login-form > p,
+#loginView .login-hero p {
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+}
+
+/* ---------- Campos de texto: efecto cristal ---------- */
+#loginView .login-field input {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 12px 16px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+#loginView .login-field input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+#loginView .login-field input:focus {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-color: #e5c158; /* color dorado del logo */
+  outline: none;
+  box-shadow: 0 0 8px rgba(229, 193, 88, 0.4);
+}
+
+/* ---------- Botón "Entrar" resaltado ---------- */
+#btnLogin {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  background: linear-gradient(135deg, #107C41 0%, #0B532B 100%);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 14px;
+  transition: all 0.3s ease;
+}
+
+#btnLogin:hover {
+  background: linear-gradient(135deg, #14924d 0%, #0f6a37 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 124, 65, 0.4);
+}

@@ -60,27 +60,37 @@ function sesionActual() {
   try { return JSON.parse(sessionStorage.getItem('proGanadoSesion')); } catch (e) { return null; }
 }
 
-function codigoLocal(correo) {
-  const c = String(Math.floor(100000 + Math.random() * 900000));
-  sessionStorage.setItem('proGanadoCodigoLocal', JSON.stringify({ 
-    correo: String(correo).toLowerCase(), 
-    codigo: c, 
-    exp: Date.now() + 5 * 60000 
-  }));
-  return c;
+// Muestra el panel principal y oculta la ventana de login.
+function entrar(sesion) {
+  const chipNombre = $a('#chipNombre');
+  const chipRol = $a('#chipRol');
+  const perfil = $a('#perfilChip');
+
+  if (chipNombre) chipNombre.textContent = sesion.nombre || sesion.user;
+  if (chipRol) chipRol.textContent = (sesion.role === 'admin' ? 'Administrador' : 'Usuario').toUpperCase();
+  if (perfil) {
+    const partes = String(sesion.nombre || sesion.user).trim().split(/\s+/);
+    perfil.textContent = partes.length > 1
+      ? (partes[0][0] + partes[1][0]).toUpperCase()
+      : (partes[0] || '?').slice(0, 2).toUpperCase();
+  }
+
+  document.body.classList.remove('modo-login');
+  $a('#loginView').style.display = 'none';
+  // '' deja que styles.css aplique su grid (245px + 1fr); 'block' rompería el sidebar.
+  const shell = $a('.app-shell');
+  if (shell) shell.style.display = '';
 }
 
-function verificarCodigoLocal(correo, codigo) {
-  try {
-    const r = JSON.parse(sessionStorage.getItem('proGanadoCodigoLocal'));
-    if (!r || r.correo !== String(correo).toLowerCase()) return { ok: false, msg: 'Solicita un nuevo código.' };
-    if (String(codigo).trim() !== r.codigo) return { ok: false, msg: 'Código incorrecto.' };
-    return { ok: true };
-  } catch (e) { return { ok: false, msg: 'Error de validación.' }; }
+function salir() {
+  try { sessionStorage.removeItem('proGanadoSesion'); } catch (e) {}
+  const form = $a('#formLogin');
+  if (form) form.reset();
+  const msg = $a('#loginMsg');
+  if (msg) msg.textContent = '';
+  document.body.classList.add('modo-login');
+  $a('#loginView').style.display = '';
 }
-
-let pasoActual = 'credenciales';
-let pendiente = null;
 
 function initAuth() {
   const formLogin = $a('#formLogin');
@@ -91,60 +101,44 @@ function initAuth() {
     const btn = $a('#btnLogin');
     const msgEl = $a('#loginMsg');
 
-    if (pasoActual === 'credenciales') {
-      const userIn = String($a('#loginUser').value).trim().toLowerCase();
-      const passIn = String($a('#loginPass').value).trim();
+    const userIn = String($a('#loginUser').value).trim().toLowerCase();
+    const passIn = String($a('#loginPass').value).trim();
 
-      if (!ES_CORREO(userIn)) { msgEl.textContent = 'Ingresa tu correo completo.'; return; }
-      if (!passIn) { msgEl.textContent = 'Ingresa tu contraseña.'; return; }
+    if (!ES_CORREO(userIn)) { msgEl.textContent = 'Ingresa tu correo completo.'; return; }
+    if (!passIn) { msgEl.textContent = 'Ingresa tu contraseña.'; return; }
 
-      btn.disabled = true;
-      btn.textContent = 'Verificando…';
+    btn.disabled = true;
+    btn.textContent = 'Verificando…';
 
-      const hashIngresado = await sha256(passIn);
-      const u = auth.usuarios.find(x => x.user === userIn);
+    const hashIngresado = await sha256(passIn);
+    const u = auth.usuarios.find(x => x.user === userIn);
 
-      btn.disabled = false;
-      btn.textContent = 'Entrar';
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
 
-      if (!u || u.hash !== hashIngresado) {
-        msgEl.textContent = 'Correo o contraseña incorrectos.';
-        return;
-      }
-
-      pendiente = u;
-      pasoActual = 'codigo';
-
-      $a('#pasoCredenciales').style.display = 'none';
-      $a('#pasoCodigo').style.display = 'block';
-
-      const cLocal = codigoLocal(u.correo);
-      const aviso = $a('#modoPruebaAviso');
-      if (aviso) {
-        aviso.style.display = 'block';
-        aviso.innerHTML = 'Tu código de acceso es: <b style="font-size: 16px; color: #1e3a29;">' + cLocal + '</b>';
-      }
-      msgEl.textContent = '';
-    } else {
-      const codigoIn = String($a('#loginCodigo').value).trim();
-      const val = verificarCodigoLocal(pendiente.correo, codigoIn);
-
-      if (!val.ok) {
-        msgEl.textContent = val.msg;
-        return;
-      }
-
-      const sesion = { user: pendiente.user, nombre: pendiente.nombre, role: pendiente.role, expira: Date.now() + DIAS_SESION * 86400000 };
-      sessionStorage.setItem('proGanadoSesion', JSON.stringify(sesion));
-
-      document.body.classList.remove('modo-login');
-      $a('#loginView').style.display = 'none';
-      $a('.app-shell').style.display = 'block';
+    if (!u || u.hash !== hashIngresado) {
+      msgEl.textContent = 'Correo o contraseña incorrectos.';
+      return;
     }
+
+    const sesion = { user: u.user, nombre: u.nombre, role: u.role, expira: Date.now() + DIAS_SESION * 86400000 };
+    sessionStorage.setItem('proGanadoSesion', JSON.stringify(sesion));
+    entrar(sesion);
   });
 }
 
 (async function authBoot() {
   await authLoad();
   initAuth();
+
+  const btnSalir = $a('#btnLogout');
+  if (btnSalir) btnSalir.addEventListener('click', ev => { ev.preventDefault(); salir(); });
+
+  // Si la sesión sigue vigente, entramos directo sin pedir la contraseña.
+  const sesion = sesionActual();
+  if (sesion && sesion.expira && sesion.expira > Date.now()) {
+    entrar(sesion);
+  } else {
+    document.body.classList.add('modo-login');
+  }
 })();
