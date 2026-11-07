@@ -6,7 +6,7 @@ Funciona en el equipo de la finca con un servidor Python que sirve la página y 
 
 ## Funcionalidades
 
-- **Inventario**: ficha por animal, foto, raza, estado, potrero, edad y cartilla con el histórico médico y reproductivo.
+- **Inventario**: ficha por animal, foto, raza, estado, potrero, edad y hoja de vida con el histórico médico, reproductivo y datos productivos. La hoja de vida permite actualizar identificación, genealogía, situación, fechas reproductivas, peso, condición corporal y notas.
 - **Salud**: tratamientos, vacunas, medicamentos y control automático de los días de retiro ICA (leche suspendida).
 - **Reproducción**: celos, inseminaciones, montas, partos y estimación de la fecha de parto.
 - **Producción**: pesajes de leche, entregas a Colanta, calidad UFC y promedio por vaca.

@@ -693,6 +693,10 @@ const fmtFecha = f => {
   const d = fechaValida(f);
   return d ? d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' }) : '—';
 };
+const fmtFechaAnio = f => {
+  const d = fechaValida(f);
+  return d ? d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+};
 const mesCorto = f => {
   const d = fechaValida(f);
   return d ? d.toLocaleDateString('es-CO', { month: 'short' }).replace('.', '').slice(0, 3).toUpperCase() : '—';
@@ -837,7 +841,11 @@ function pintarEstadoDatos(estado) {
 const raza = id => (db.razas.find(r => r.id_raza === id) || {}).nombre_raza || '—';
 const potrero = id => db.potreros.find(p => p.id_potrero === id);
 const bovino = id => db.bovinos.find(b => b.id_bovino === id);
-const nombreBov = id => (bovino(id) || {}).name || '—';
+const nombreBov = id => {
+  const b = bovino(id);
+  return b ? (b.name || 'Animal #' + b.tag) : '—';
+};
+const etiquetaBovino = b => b ? (b.name ? b.name + ' · #' + b.tag : 'Animal #' + b.tag) : 'Animal';
 const medicamento = id => db.medicamentos.find(m => m.id_medicamento === id);
 
 /* Días de retiro pendientes: >0 => leche suspendida */
@@ -876,21 +884,22 @@ function renderGanado() {
     const retiro = retiroPendiente(b.id_bovino);
     const td1 = document.createElement('td');
     const estado = String(b.estado || '');
+    const nombreVisible = b.name || ('Animal #' + b.tag);
     const avatar = b.foto
-      ? '<img class="animal-foto" loading="lazy" title="Ver foto grande" src="' + esc(b.foto) + '" alt="' + esc(b.name) + '" />'
+      ? '<img class="animal-foto" loading="lazy" title="Ver foto grande" src="' + esc(b.foto) + '" alt="' + esc(nombreVisible) + '" />'
       : '<span class="animal-avatar">' + (b.sexo === 'Macho' ? '♂' : estado.includes('Tern') ? '◌' : '♀') + '</span>';
-    td1.innerHTML = '<div class="animal-cell">' + avatar + '<strong>' + esc(b.name) + '</strong></div>';
+    td1.innerHTML = '<div class="animal-cell">' + avatar + '<strong>' + esc(nombreVisible) + '</strong></div>';
     tr.append(td1);
     if (b.foto) { td1.querySelector('.animal-foto').addEventListener('click', () => abrirFoto(b.id_bovino)); }
-    const celdas = [ '#' + b.tag, raza(b.id_raza), b.estado, (potrero(b.id_potrero) || {}).nombre_potrero || '—' ];
+    const celdas = [ '#' + b.tag, raza(b.id_raza), b.estado || 'Sin definir', (potrero(b.id_potrero) || {}).nombre_potrero || '—' ];
     for (const val of celdas) { const td = document.createElement('td'); td.textContent = val; tr.append(td); }
     const tdSeg = document.createElement('td');
     tdSeg.innerHTML = retiro > 0 ? '<span class="badge b-red">Retiro ' + retiro + ' d</span>' : '<span class="badge b-green">Al día</span>';
     const tdBtn = document.createElement('td');
     tdBtn.style.whiteSpace = 'nowrap';
-    const btn = document.createElement('button'); btn.className = 'mini-btn'; btn.textContent = 'Cartilla';
-    btn.addEventListener('click', () => { $('#cartillaSelect').value = b.id_bovino; renderCartilla(); $('#cartillaSelect').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
-    const btnEdit = document.createElement('button'); btnEdit.className = 'mini-btn'; btnEdit.textContent = '✎'; btnEdit.title = 'Editar animal';
+    const btn = document.createElement('button'); btn.className = 'mini-btn'; btn.textContent = 'Hoja de vida';
+    btn.addEventListener('click', () => { $('#cartillaSelect').value = b.id_bovino; renderCartilla(); document.getElementById('hojaVidaPanel').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    const btnEdit = document.createElement('button'); btnEdit.className = 'mini-btn'; btnEdit.textContent = '✎'; btnEdit.title = 'Actualizar hoja de vida';
     btnEdit.addEventListener('click', () => abrirEdicion(b.id_bovino));
     const btnDel = document.createElement('button'); btnDel.className = 'mini-btn danger'; btnDel.textContent = '🗑'; btnDel.title = 'Eliminar registro (solo administrador)';
     btnDel.addEventListener('click', () => eliminarBovino(b.id_bovino));
@@ -906,11 +915,19 @@ function renderGanado() {
   const crias = db.bovinos.filter(b => String(b.estado || '').includes('Tern')).length;
   $('#metricComp').textContent = hembras + ' hembras · ' + machos + ' machos · ' + crias + ' crías';
 
-  // selector de cartilla
+  // selector de hoja de vida
   const sel = $('#cartillaSelect');
   const previo = sel.value;
-  sel.replaceChildren(...db.bovinos.map(b => new Option((b.name || 'Hoja de vida') + ' · #' + b.tag, b.id_bovino)));
+  sel.replaceChildren(...db.bovinos.map(b => new Option(etiquetaBovino(b), b.id_bovino)));
   if (previo && db.bovinos.some(b => b.id_bovino === previo)) sel.value = previo;
+}
+
+function bloqueHojaVida(titulo, filas) {
+  const visibles = filas.filter(([, valor]) => valor !== null && valor !== undefined && String(valor).trim() !== '');
+  if (!visibles.length) return '';
+  return '<div class="hoja-bloque"><p class="section-eyebrow eyebrow">' + esc(titulo) + '</p><div class="hoja-datos">' +
+    visibles.map(([etiqueta, valor]) => '<div><span>' + esc(etiqueta) + '</span><b>' + esc(valor) + '</b></div>').join('') +
+    '</div></div>';
 }
 
 function renderCartilla() {
@@ -922,16 +939,65 @@ function renderCartilla() {
   const eventos = db.eventos.filter(e => e.id_bovino === id).sort((a, c) => String(c.fecha_evento || '').localeCompare(String(a.fecha_evento || '')));
   const pesajes = db.pesajes.filter(p => p.id_bovino === id).sort((a, c) => (String(c.fecha_pesaje || '') + String(c.hora_pesaje || '')).localeCompare(String(a.fecha_pesaje || '') + String(a.hora_pesaje || '')));
   const retiro = retiroPendiente(id);
+  const situacion = clean(b.situacion);
+  const sitBadge = situacion
+    ? '<span class="badge ' + (situacion === 'Enfermo' ? 'b-red' : situacion === 'Venta' || situacion === 'Descarte' ? 'b-amber' : 'b-green') + '">' + esc(situacion) + '</span>'
+    : '—';
+  const desdeParto = b.ultimo_parto && fechaValida(b.ultimo_parto) ? b.ultimo_parto : '';
+  const pesajesLactancia = desdeParto ? pesajes.filter(p => String(p.fecha_pesaje || '') >= desdeParto) : pesajes;
+  const totalLeche = pesajesLactancia.reduce((s, p) => s + (Number(p.litros_obtenidos) || 0), 0);
+  const diasLactancia = desdeParto ? Math.max(0, diasDesde(desdeParto)) : '';
+  const filasManejo = [
+    ['Nacimiento', b.birth ? fmtFechaAnio(b.birth) : ''],
+    ['Padre', clean(b.padre)],
+    ['Madre', clean(b.madre)],
+    ['Color', clean(b.color)],
+    ['Lote / grupo', clean(b.lote)],
+    ['Hierro', clean(b.hierro)],
+    ['Chip', clean(b.chip)],
+    ['Procedencia', clean(b.procedencia)]
+  ];
+  const filasRepro = [
+    ['Último parto', b.ultimo_parto ? fmtFechaAnio(b.ultimo_parto) : ''],
+    ['Último celo', b.ultimo_celo ? fmtFechaAnio(b.ultimo_celo) : ''],
+    ['Fecha de preñez', b.fecha_prenez ? fmtFechaAnio(b.fecha_prenez) : ''],
+    ['Parto esperado', b.parto_esperado ? fmtFechaAnio(b.parto_esperado) : ''],
+    ['Reproductor / toro', clean(b.reproductor)],
+    ['Tipo de servicio', clean(b.tipo_servicio)],
+    ['N.º de servicios', b.servicios === '' || b.servicios == null ? '' : String(b.servicios)],
+    ['N.º de partos', b.partos === '' || b.partos == null ? '' : String(b.partos)],
+    ['Abortos', b.abortos === '' || b.abortos == null ? '' : String(b.abortos)]
+  ];
+  const filasPeso = [
+    ['Peso actual', b.peso_kg === '' || b.peso_kg == null ? '' : b.peso_kg + ' kg'],
+    ['Fecha del pesaje', b.peso_fecha ? fmtFechaAnio(b.peso_fecha) : ''],
+    ['Condición corporal', b.condicion_corporal === '' || b.condicion_corporal == null ? '' : b.condicion_corporal + ' / 5'],
+    ['Leche registrada', pesajes.length ? totalLeche.toLocaleString('es-CO', { maximumFractionDigits: 1 }) + ' L' : ''],
+    ['Controles lácteos', pesajes.length ? String(pesajes.length) : ''],
+    ['Días de lactancia', diasLactancia === '' ? '' : diasLactancia + ' días']
+  ];
+  const bloques = bloqueHojaVida('Genealogía y manejo', filasManejo) +
+    bloqueHojaVida('Reproducción', filasRepro) +
+    bloqueHojaVida('Peso y salud', filasPeso);
+  const notasHoja = [
+    b.notas_salud ? ['Notas de salud', b.notas_salud] : null,
+    b.observaciones ? ['Observaciones', b.observaciones] : null
+  ].filter(Boolean);
+  const notaHtml = notasHoja.map(([titulo, texto]) => '<div class="hoja-nota"><span>' + esc(titulo) + '</span><p>' + esc(texto) + '</p></div>').join('');
+  const contenidoAmpliado = bloques + notaHtml ||
+    '<div class="hoja-vacia">Aún no hay datos ampliados de este animal. Usa <b>Actualizar datos</b> para completar genealogía, reproducción, peso y salud.</div>';
   cont.innerHTML =
-    '<div class="cartilla-head">' + (b.foto ? '<img src="' + esc(b.foto) + '" alt="' + esc(b.name || 'Hoja de vida') + '" />' : '') + '<div><strong>Hoja de vida</strong><span>' + esc(b.marca || 'Sin marca') + ' · ' + esc(raza(b.id_raza)) + '</span></div></div>' +
+    '<div class="cartilla-head">' + (b.foto ? '<img src="' + esc(b.foto) + '" alt="' + esc(b.name || 'Animal #' + b.tag) + '" />' : '') + '<div><strong>' + esc(b.name || 'Animal #' + b.tag) + '</strong><span>Hoja de vida · #' + esc(b.tag) + ' · ' + esc(raza(b.id_raza)) + '</span></div></div>' +
     '<div class="kpi-list">' +
     '<div><span>Raza</span><b>' + esc(raza(b.id_raza)) + '</b></div>' +
     '<div><span>Edad</span><b>' + edadTexto(b.birth) + '</b></div>' +
-    '<div><span>Estado fisiológico</span><b>' + esc(b.estado || '—') + '</b></div>' +
+    '<div><span>Estado fisiológico</span><b>' + esc(b.estado || 'Sin definir') + '</b></div>' +
+    '<div><span>Situación</span><b>' + sitBadge + '</b></div>' +
     '<div><span>Potrero</span><b>' + esc((potrero(b.id_potrero) || {}).nombre_potrero || '—') + '</b></div>' +
     '<div><span>Identificación</span><b>' + esc(b.marca || 'Sin marca registrada') + '</b></div>' +
     '<div><span>Seguimiento médico</span><b>' + (retiro > 0 ? '<span class="badge b-red">LECHE SUSPENDIDA · retiro ' + retiro + ' días</span>' : '<span class="badge b-green">Sin retiro activo</span>') + '</b></div>' +
     '</div>' +
+    contenidoAmpliado +
     '<p class="section-eyebrow eyebrow">Tratamientos y vacunas (' + tratamientos.length + ')</p>' +
     (tratamientos.length ? '<div class="reto-list">' + tratamientos.map(t => {
       const med = medicamento(t.id_medicamento) || {};
@@ -1129,27 +1195,27 @@ function renderInicio() {
 
 /* ---------- Selectores dependientes ---------- */
 function fillSelects() {
-  $('#razaSelect').replaceChildren(...db.razas.map(r => new Option(r.nombre_raza, r.id_raza)));
-  const etiqueta = b => (b.name || 'Hoja de vida') + ' · #' + b.tag;
-  $('#tratBovinoSelect').replaceChildren(...db.bovinos.map(b => new Option(etiqueta(b), b.id_bovino)));
-  $('#evBovinoSelect').replaceChildren(...db.bovinos.map(b => new Option(etiqueta(b), b.id_bovino)));
-  $('#pesBovinoSelect').replaceChildren(...db.bovinos.filter(b => b.estado === 'En Ordeño').map(b => new Option(etiqueta(b), b.id_bovino)));
+  $('#razaSelect').replaceChildren(new Option('Sin definir', ''), ...db.razas.map(r => new Option(r.nombre_raza, r.id_raza)));
+  $('#tratBovinoSelect').replaceChildren(...db.bovinos.map(b => new Option(etiquetaBovino(b), b.id_bovino)));
+  $('#evBovinoSelect').replaceChildren(...db.bovinos.map(b => new Option(etiquetaBovino(b), b.id_bovino)));
+  $('#pesBovinoSelect').replaceChildren(...db.bovinos.filter(b => b.estado === 'En Ordeño').map(b => new Option(etiquetaBovino(b), b.id_bovino)));
   $('#tratMedSelect').replaceChildren(...db.medicamentos.map(m => new Option(m.nombre_farmaco + ' (retiro ' + m.dias_retiro_ica + ' d)', m.id_medicamento)));
-  $('#cartillaSelect').replaceChildren(...db.bovinos.map(b => new Option(etiqueta(b), b.id_bovino)));
+  $('#cartillaSelect').replaceChildren(...db.bovinos.map(b => new Option(etiquetaBovino(b), b.id_bovino)));
+  $('#potreroSelect').replaceChildren(new Option('Sin potrero', ''), ...db.potreros.map(p => new Option(p.nombre_potrero, p.id_potrero)));
 }
 
 /* ---------- Lightbox de foto ---------- */
 function abrirFoto(id) {
   const b = bovino(id); if (!b || !b.foto) return;
   $('#fotoGrande').src = b.foto;
-  $('#fotoNombre').textContent = b.name;
+  $('#fotoNombre').textContent = b.name || ('Animal #' + b.tag);
   $('#fotoNombre').dataset.id = id;
   const r = retiroPendiente(id);
-  $('#fotoDetalle').textContent = '#' + b.tag + ' · ' + raza(b.id_raza) + ' · ' + b.estado + (r > 0 ? ' · ⚠ retiro ' + r + ' d' : '');
+  $('#fotoDetalle').textContent = '#' + b.tag + ' · ' + raza(b.id_raza) + ' · ' + (b.estado || 'Sin definir') + (r > 0 ? ' · ⚠ retiro ' + r + ' d' : '');
   document.getElementById('fotoModal').showModal();
 }
 $('#fotoClose').addEventListener('click', () => document.getElementById('fotoModal').close());
-$('#fotoCartilla').addEventListener('click', () => { const id = $('#fotoNombre').dataset.id; document.getElementById('fotoModal').close(); $('#cartillaSelect').value = id; renderCartilla(); $('#cartillaSelect').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+$('#fotoCartilla').addEventListener('click', () => { const id = $('#fotoNombre').dataset.id; document.getElementById('fotoModal').close(); $('#cartillaSelect').value = id; renderCartilla(); document.getElementById('hojaVidaPanel').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 
 /* ---------- Editar / eliminar animal ---------- */
 let idEditando = null;
@@ -1157,17 +1223,28 @@ function abrirEdicion(id) {
   const b = bovino(id); if (!b) return;
   idEditando = id;
   fillSelects();
-  $('#eyebrowBovino').textContent = 'Editar registro';
-  $('#tituloBovino').textContent = 'Editar · ' + b.name;
+  $('#eyebrowBovino').textContent = 'Hoja de vida';
+  $('#tituloBovino').textContent = 'Actualizar · ' + (b.name ? b.name + ' · #' + b.tag : 'Animal #' + b.tag);
   const f = $('#formBovino');
-  f.name.value = b.name; f.tag.value = b.tag; f.raza.value = b.id_raza; f.sexo.value = b.sexo;
-  f.estado.value = b.estado; f.potrero.value = b.id_potrero || ''; f.birth.value = b.birth; f.marca.value = b.marca || '';
+  const campos = ['name', 'tag', 'marca', 'chip', 'color', 'hierro', 'lote', 'situacion', 'procedencia',
+    'padre', 'madre', 'ultimo_parto', 'ultimo_celo', 'fecha_prenez', 'parto_esperado', 'reproductor',
+    'tipo_servicio', 'servicios', 'partos', 'abortos', 'peso_kg', 'peso_fecha', 'condicion_corporal',
+    'notas_salud', 'observaciones'];
+  for (const campo of campos) {
+    if (f.elements[campo]) f.elements[campo].value = b[campo] == null ? '' : b[campo];
+  }
+  f.elements.raza.value = b.id_raza || '';
+  f.elements.sexo.value = b.sexo || '';
+  f.elements.estado.value = b.estado || '';
+  f.elements.potrero.value = b.id_potrero || '';
+  f.elements.birth.value = b.birth || '';
   document.getElementById('modalBovino').showModal();
 }
 function eliminarBovino(id) {
   const b = bovino(id); if (!b) return;
   const relacionados = db.tratamientos.filter(t => t.id_bovino === id).length + db.eventos.filter(e => e.id_bovino === id).length + db.pesajes.filter(p => p.id_bovino === id).length;
-  const msg = '¿Eliminar el registro de ' + b.name + ' (#' + b.tag + ')?' + (relacionados ? '\n\nTambién se borrarán ' + relacionados + ' registro(s) médicos y de producción asociados.' : '');
+  const etiqueta = b.name ? b.name + ' (#' + b.tag + ')' : 'Animal #' + b.tag;
+  const msg = '¿Eliminar el registro de ' + etiqueta + '?' + (relacionados ? '\n\nTambién se borrarán ' + relacionados + ' registro(s) médicos y de producción asociados.' : '');
   if (!confirm(msg)) return;
   db.bovinos = db.bovinos.filter(x => x.id_bovino !== id);
   db.tratamientos = db.tratamientos.filter(t => t.id_bovino !== id);
@@ -1179,10 +1256,24 @@ function eliminarBovino(id) {
 /* ---------- Modales ---------- */
 function openModal(id) {
   fillSelects();
-  if (id === 'modalBovino') { idEditando = null; $('#eyebrowBovino').textContent = 'Nuevo registro'; $('#tituloBovino').textContent = 'Registrar animal'; $('#formBovino').reset(); }
+  if (id === 'modalBovino') {
+    idEditando = null;
+    $('#eyebrowBovino').textContent = 'Nuevo registro';
+    $('#tituloBovino').textContent = 'Registrar animal';
+    const f = $('#formBovino');
+    f.reset();
+    f.elements.sexo.value = 'Hembra';
+    f.elements.estado.value = 'En Ordeño';
+    f.elements.situacion.value = 'Activo';
+  }
   const d = document.getElementById(id); if (id === 'modalTratamiento') avisoTrat(); if (id === 'modalPesaje') avisoPesaje(); d.showModal();
 }
 $$('[data-open-modal]').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.openModal)));
+$('#btnEditarHojaVida').addEventListener('click', () => {
+  const id = $('#cartillaSelect').value;
+  if (!id) { alert('No hay animales registrados.'); return; }
+  abrirEdicion(id);
+});
 
 function avisoTrat() {
   const id = $('#tratBovinoSelect').value, medId = $('#tratMedSelect').value;
@@ -1202,8 +1293,25 @@ $('#pesBovinoSelect').addEventListener('change', avisoPesaje);
 $('#formBovino').addEventListener('submit', e => {
   e.preventDefault();
   const f = Object.fromEntries(new FormData(e.target));
-  if (db.bovinos.some(b => b.tag.toLowerCase() === clean(f.tag).toLowerCase() && b.id_bovino !== idEditando)) { alert('Ese número de arete ya existe.'); return; }
-  const datos = { name: clean(f.name), tag: clean(f.tag), id_raza: f.raza, sexo: f.sexo, estado: f.estado, id_potrero: f.potrero || '', birth: f.birth, marca: clean(f.marca) };
+  const tag = clean(f.tag);
+  if (!tag) { alert('El arete es obligatorio.'); return; }
+  if (db.bovinos.some(b => clean(b.tag).toLowerCase() === tag.toLowerCase() && b.id_bovino !== idEditando)) { alert('Ese número de arete ya existe.'); return; }
+  const numero = valor => valor === '' || valor == null ? '' : Number(valor);
+  const datos = {
+    name: clean(f.name), tag,
+    id_raza: f.raza || '', sexo: clean(f.sexo), estado: clean(f.estado),
+    id_potrero: f.potrero || '', birth: f.birth || '', marca: clean(f.marca),
+    chip: clean(f.chip), color: clean(f.color), hierro: clean(f.hierro),
+    lote: clean(f.lote), situacion: clean(f.situacion), procedencia: clean(f.procedencia),
+    padre: clean(f.padre), madre: clean(f.madre),
+    ultimo_parto: f.ultimo_parto || '', ultimo_celo: f.ultimo_celo || '',
+    fecha_prenez: f.fecha_prenez || '', parto_esperado: f.parto_esperado || '',
+    reproductor: clean(f.reproductor), tipo_servicio: clean(f.tipo_servicio),
+    servicios: numero(f.servicios), partos: numero(f.partos), abortos: numero(f.abortos),
+    peso_kg: numero(f.peso_kg), peso_fecha: f.peso_fecha || '',
+    condicion_corporal: numero(f.condicion_corporal),
+    notas_salud: clean(f.notas_salud), observaciones: clean(f.observaciones)
+  };
   if (idEditando) {
     const b = bovino(idEditando); if (b) Object.assign(b, datos);
   } else {
@@ -1285,8 +1393,8 @@ $$('[data-page-link]').forEach(btn => btn.addEventListener('click', () => docume
 
 /* ---------- Exportar CSV ---------- */
 $('#exportCsv').addEventListener('click', () => {
-  const rows = [['Nombre', 'Arete', 'Raza', 'Sexo', 'Estado', 'Potrero', 'Nacimiento', 'Marca', 'Retiro dias restantes']].concat(
-    db.bovinos.map(b => [b.name, b.tag, raza(b.id_raza), b.sexo, b.estado, (potrero(b.id_potrero) || {}).nombre_potrero || '', b.birth, b.marca || '', retiroPendiente(b.id_bovino)]));
+  const rows = [['Nombre', 'Arete', 'Raza', 'Sexo', 'Estado', 'Situación', 'Potrero', 'Lote', 'Nacimiento', 'Marca', 'Chip', 'Padre', 'Madre', 'Peso kg', 'Último parto', 'Partos', 'Parto esperado', 'Reproductor', 'Retiro dias restantes']].concat(
+    db.bovinos.map(b => [b.name, b.tag, raza(b.id_raza), b.sexo, b.estado, b.situacion || '', (potrero(b.id_potrero) || {}).nombre_potrero || '', b.lote || '', b.birth, b.marca || '', b.chip || '', b.padre || '', b.madre || '', b.peso_kg, b.ultimo_parto || '', b.partos, b.parto_esperado || '', b.reproductor || '', retiroPendiente(b.id_bovino)]));
   const blob = new Blob(['\ufeff' + rows.map(r => r.map(csvSeguro).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8;' });
   const link = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'proganado-inventario.csv' });
   link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 0);

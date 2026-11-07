@@ -137,8 +137,8 @@
         <div class="page-top banner"><div><p class="eyebrow">Inventario</p><h2>Mi ganado</h2><span>Consulta y administra cada animal de la finca.</span></div><div class="banner-actions"><button class="secondary" id="exportCsv">⇩ Exportar CSV</button> <button class="primary" data-open-modal="modalBovino">+ Registrar animal</button></div></div>
         <div class="toolbar"><label>⌕ <input id="searchAnimals" placeholder="Buscar por arete o nombre" /></label><select id="categoryFilter"><option value="Todos">Todos los estados</option><option>En Ordeño</option><option>Horra Seca</option><option>Novilla Vientre</option><option>Toro</option><option>Ternera</option><option>Ternero</option><option>Descarte</option></select></div>
         <section class="panel table-panel"><table><thead><tr><th>ANIMAL</th><th>ARETE</th><th>RAZA</th><th>ESTADO</th><th>POTRERO</th><th>SEG. MÉDICO</th><th></th></tr></thead><tbody id="animalsTable"></tbody></table><p id="emptyState" class="empty">No hay animales que coincidan.</p></section>
-        <section class="panel" style="margin-top:18px"><div class="panel-heading"><div><p class="eyebrow">Seguimiento</p><h2>Cartilla por animal</h2><span>Histórico médico y reproductivo completo de cada bovino.</span></div></div>
-          <div class="toolbar"><select id="cartillaSelect" style="flex:1;max-width:340px"></select></div>
+        <section class="panel" id="hojaVidaPanel" style="margin-top:18px"><div class="panel-heading"><div><p class="eyebrow">Seguimiento</p><h2>Hoja de vida por animal</h2><span>Histórico médico, reproductivo y datos productivos de cada bovino.</span></div></div>
+          <div class="toolbar cartilla-toolbar"><select id="cartillaSelect" aria-label="Seleccionar animal"></select><button class="secondary" id="btnEditarHojaVida" type="button">✎ Actualizar datos</button></div>
           <div id="cartillaContent"></div>
         </section>
       </section>
@@ -264,20 +264,60 @@
       </section>
     </main>
   </div>
-  <dialog id="modalBovino"><form id="formBovino" method="dialog"><div class="modal-header"><div><p class="eyebrow" id="eyebrowBovino">Nuevo registro</p><h2 id="tituloBovino">Registrar animal</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
-    <div class="form-grid">
-      <label>Nombre<input required name="name" placeholder="Ej. Canela" /></label>
-      <label>Arete<input required name="tag" placeholder="Ej. 00128" /></label>
-      <label>Raza<select name="raza" id="razaSelect"></select></label>
-      <label>Sexo<select name="sexo"><option>Hembra</option><option>Macho</option></select></label>
-      <label>Estado fisiológico<select name="estado"><option>En Ordeño</option><option>Horra Seca</option><option>Novilla Vientre</option><option>Toro</option><option>Ternera</option><option>Ternero</option></select></label>
-      <label>Potrero<select name="potrero" id="potreroSelect"></select></label>
-      <label>Fecha de nacimiento<input required name="birth" type="date" /></label>
-      <label>Marca (arete/chip)<input name="marca" placeholder="Ej. Arete ICA 128" /></label>
+  <dialog id="modalBovino" class="modal-hoja-vida"><form id="formBovino" method="dialog"><div class="modal-header"><div><p class="eyebrow" id="eyebrowBovino">Nuevo registro</p><h2 id="tituloBovino">Registrar animal</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
+    <div class="form-seccion">
+      <h3>Identificación y manejo</h3>
+      <div class="form-grid hoja-vida-grid">
+        <label>Nombre<input name="name" placeholder="Ej. Canela" /></label>
+        <label>Arete *<input required name="tag" placeholder="Ej. 00128" /></label>
+        <label>Raza<select name="raza" id="razaSelect"></select></label>
+        <label>Sexo<select name="sexo"><option value="">Sin definir</option><option>Hembra</option><option>Macho</option></select></label>
+        <label>Estado fisiológico<select name="estado"><option value="">Sin definir</option><option>En Ordeño</option><option>Horra Seca</option><option>Novilla Vientre</option><option>Toro</option><option>Ternera</option><option>Ternero</option><option>Descarte</option></select></label>
+        <label>Potrero<select name="potrero" id="potreroSelect"></select></label>
+        <label>Fecha de nacimiento<input name="birth" type="date" /></label>
+        <label>Marca / arete ICA<input name="marca" placeholder="Ej. Arete ICA 128" /></label>
+        <label>Chip<input name="chip" placeholder="Ej. 985141000123456" /></label>
+        <label>Color<input name="color" placeholder="Ej. Colorado" /></label>
+        <label>Hierro<input name="hierro" placeholder="Ej. H-12" /></label>
+        <label>Lote / grupo<input name="lote" placeholder="Ej. Lote 2" /></label>
+        <label>Situación<select name="situacion"><option value="">Sin definir</option><option>Activo</option><option>Enfermo</option><option>Venta</option><option>Descarte</option></select></label>
+        <label>Procedencia<input name="procedencia" placeholder="Ej. Finca El Porvenir" /></label>
+      </div>
     </div>
-    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Guardar animal</button></div></form></dialog>
+    <div class="form-seccion">
+      <h3>Genealogía</h3>
+      <div class="form-grid hoja-vida-grid">
+        <label>Padre (arete o nombre)<input name="padre" placeholder="Ej. 045" /></label>
+        <label>Madre (arete o nombre)<input name="madre" placeholder="Ej. 1024" /></label>
+      </div>
+    </div>
+    <div class="form-seccion">
+      <h3>Reproducción</h3>
+      <div class="form-grid hoja-vida-grid">
+        <label>Último parto<input name="ultimo_parto" type="date" /></label>
+        <label>Último celo<input name="ultimo_celo" type="date" /></label>
+        <label>Fecha de preñez<input name="fecha_prenez" type="date" /></label>
+        <label>Parto esperado<input name="parto_esperado" type="date" /></label>
+        <label>Reproductor / toro<input name="reproductor" placeholder="Ej. Toro 12" /></label>
+        <label>Tipo de servicio<select name="tipo_servicio"><option value="">Sin registrar</option><option>Inseminación artificial</option><option>Monta natural</option></select></label>
+        <label>N.º de servicios<input name="servicios" type="number" min="0" step="1" inputmode="numeric" placeholder="0" /></label>
+        <label>N.º de partos<input name="partos" type="number" min="0" step="1" inputmode="numeric" placeholder="0" /></label>
+        <label>Abortos<input name="abortos" type="number" min="0" step="1" inputmode="numeric" placeholder="0" /></label>
+      </div>
+    </div>
+    <div class="form-seccion">
+      <h3>Peso, salud y observaciones</h3>
+      <div class="form-grid hoja-vida-grid">
+        <label>Peso actual (kg)<input name="peso_kg" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Ej. 420" /></label>
+        <label>Fecha del pesaje<input name="peso_fecha" type="date" /></label>
+        <label>Condición corporal (1–5)<input name="condicion_corporal" type="number" min="1" max="5" step="0.1" inputmode="decimal" placeholder="Ej. 3.5" /></label>
+        <label class="span-3">Notas de salud<textarea name="notas_salud" rows="2" placeholder="Vacunas, alergias, tratamientos o novedades..."></textarea></label>
+        <label class="span-3">Observaciones<textarea name="observaciones" rows="2" placeholder="Información adicional del animal..."></textarea></label>
+      </div>
+    </div>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button class="primary" value="default">Guardar hoja de vida</button></div></form></dialog>
 
-  <dialog id="modalTratamiento"><form id="formTratamiento" method="dialog"><div class="modal-header"><div><p class="eyebrow">Sanidad</p><h2>Registrar tratamiento</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+  <dialog id="modalTratamiento"><form id="formTratamiento" method="dialog"><div class="modal-header"><div><p class="eyebrow">Sanidad</p><h2>Registrar tratamiento</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
     <div class="form-grid">
       <label>Animal<select name="bovino" id="tratBovinoSelect" required></select></label>
       <label>Medicamento<select name="medicamento" id="tratMedSelect" required></select></label>
@@ -287,25 +327,25 @@
       <label>Nota<input name="nota" placeholder="Observaciones" /></label>
     </div>
     <p style="padding:0 25px;font-size:11px;color:#a86c20" id="tratAviso"></p>
-    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Guardar tratamiento</button></div></form></dialog>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button class="primary" value="default">Guardar tratamiento</button></div></form></dialog>
 
-  <dialog id="modalMedicamento"><form id="formMedicamento" method="dialog"><div class="modal-header"><div><p class="eyebrow">Catálogo</p><h2>Agregar medicamento</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+  <dialog id="modalMedicamento"><form id="formMedicamento" method="dialog"><div class="modal-header"><div><p class="eyebrow">Catálogo</p><h2>Agregar medicamento</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
     <div class="form-grid">
       <label>Nombre del fármaco<input required name="nombre" placeholder="Ej. Oxitetraciclina LA" /></label>
       <label>Días de retiro ICA<input required name="retiro" type="number" min="0" max="60" placeholder="Ej. 5" /></label>
     </div>
-    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Guardar medicamento</button></div></form></dialog>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button class="primary" value="default">Guardar medicamento</button></div></form></dialog>
 
-  <dialog id="modalEvento"><form id="formEvento" method="dialog"><div class="modal-header"><div><p class="eyebrow">Reproducción</p><h2>Registrar evento</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+  <dialog id="modalEvento"><form id="formEvento" method="dialog"><div class="modal-header"><div><p class="eyebrow">Reproducción</p><h2>Registrar evento</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
     <div class="form-grid">
       <label>Animal<select name="bovino" id="evBovinoSelect" required></select></label>
       <label>Tipo de evento<select name="tipo"><option>Celo Observable</option><option>Inseminación</option><option>Monta Natural</option><option>Diagnóstico de Gestación</option><option>Parto</option></select></label>
       <label>Fecha del evento<input required name="fecha" type="date" /></label>
       <label>Nota<input name="nota" placeholder="Observaciones" /></label>
     </div>
-    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Guardar evento</button></div></form></dialog>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button class="primary" value="default">Guardar evento</button></div></form></dialog>
 
-  <dialog id="modalPesaje"><form id="formPesaje" method="dialog"><div class="modal-header"><div><p class="eyebrow">Ordeño</p><h2>Registrar pesaje</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+  <dialog id="modalPesaje"><form id="formPesaje" method="dialog"><div class="modal-header"><div><p class="eyebrow">Ordeño</p><h2>Registrar pesaje</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
     <div class="form-grid">
       <label>Vaca en ordeño<select name="bovino" id="pesBovinoSelect" required></select></label>
       <label>Fecha<input required name="fecha" type="date" /></label>
@@ -313,35 +353,35 @@
       <label>Litros<input required name="litros" type="number" step="0.1" min="0.1" placeholder="Ej. 12.5" /></label>
     </div>
     <p style="padding:0 25px;font-size:11px;color:#b44838" id="pesAviso"></p>
-    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Guardar pesaje</button></div></form></dialog>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button class="primary" value="default">Guardar pesaje</button></div></form></dialog>
 
-  <dialog id="modalEntrega"><form id="formEntrega" method="dialog"><div class="modal-header"><div><p class="eyebrow">Acopio Colanta</p><h2>Registrar entrega</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+  <dialog id="modalEntrega"><form id="formEntrega" method="dialog"><div class="modal-header"><div><p class="eyebrow">Acopio Colanta</p><h2>Registrar entrega</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
     <div class="form-grid">
       <label>Fecha de entrega<input required name="fecha" type="date" /></label>
       <label>Litros totales<input required name="litros" type="number" step="0.1" min="0.1" /></label>
       <label>Valor bruto estimado ($)<input required name="valor" type="number" step="100" min="0" /></label>
       <label>Recuento UFC<input required name="ufc" type="number" step="1000" min="0" placeholder="Ej. 80000" /></label>
     </div>
-    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Guardar entrega</button></div></form></dialog>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button class="primary" value="default">Guardar entrega</button></div></form></dialog>
 
-  <dialog id="modalMovimiento"><form id="formMovimiento" method="dialog"><div class="modal-header"><div><p class="eyebrow">Potreros PRV</p><h2>Registrar pastoreo</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+  <dialog id="modalMovimiento"><form id="formMovimiento" method="dialog"><div class="modal-header"><div><p class="eyebrow">Potreros PRV</p><h2>Registrar pastoreo</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
     <div class="form-grid">
       <label>Acción<select name="accion"><option>Entrada al potrero</option><option>Salida del potrero</option></select></label>
       <label>Potrero<select name="potrero" id="movPotreroSelect" required></select></label>
       <label>Fecha<input required name="fecha" type="date" /></label>
       <label>Cantidad de animales<input required name="cantidad" type="number" min="1" placeholder="Ej. 8" /></label>
     </div>
-    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Registrar</button></div></form></dialog>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button class="primary" value="default">Registrar</button></div></form></dialog>
 
-  <dialog id="modalPotrero"><form id="formPotrero" method="dialog"><div class="modal-header"><div><p class="eyebrow">Potreros PRV</p><h2>Agregar potrero</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+  <dialog id="modalPotrero"><form id="formPotrero" method="dialog"><div class="modal-header"><div><p class="eyebrow">Potreros PRV</p><h2>Agregar potrero</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
     <div class="form-grid">
       <label>Nombre del potrero<input required name="nombre" placeholder="Ej. Potrero Norte" /></label>
       <label>Días de ocupación<input required name="ocupacion" type="number" min="1" max="10" value="1" /></label>
       <label>Días de descanso (PRV)<input required name="descanso" type="number" min="10" max="90" value="35" /></label>
     </div>
-    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Guardar potrero</button></div></form></dialog>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button class="primary" value="default">Guardar potrero</button></div></form></dialog>
 
-  <dialog id="modalContab"><form id="formContab" method="dialog"><div class="modal-header"><div><p class="eyebrow">Contabilidad</p><h2>Registrar movimiento</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+  <dialog id="modalContab"><form id="formContab" method="dialog"><div class="modal-header"><div><p class="eyebrow">Contabilidad</p><h2>Registrar movimiento</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
     <div class="form-grid">
       <label>Tipo<select name="tipo" required><option value="Entrada">Entrada de dinero (ingreso)</option><option value="Salida">Salida de dinero (gasto)</option></select></label>
       <label>Fecha<input required name="fecha" type="date" /></label>
@@ -354,18 +394,18 @@
       <label style="grid-column:1/-1">Foto de la factura (JPG, PNG o WEBP)<input name="foto" type="file" accept="image/*" /></label>
       <label style="grid-column:1/-1">Notas<input name="notas" placeholder="Opcional" /></label>
     </div>
-    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Guardar</button></div></form></dialog>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button class="primary" value="default">Guardar</button></div></form></dialog>
 
-  <dialog id="modalReporte"><form id="formReporte" method="dialog"><div class="modal-header"><div><p class="eyebrow">Contabilidad</p><h2>Reporte mensual en PDF</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+  <dialog id="modalReporte"><form id="formReporte" method="dialog"><div class="modal-header"><div><p class="eyebrow">Contabilidad</p><h2>Reporte mensual en PDF</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
     <div class="form-grid">
       <label>Mes del reporte<input type="month" name="mes" required /></label>
       <label>Nombre de la empresa<input name="empresa" placeholder="Ej. Hacienda San Pedro" /></label>
       <label style="grid-column:1/-1;flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="anexo" checked /> Incluir anexo con las fotos de las facturas</label>
     </div>
     <p class="estado-datos">El PDF incluye los movimientos del mes, el resumen por categoría y el saldo.</p>
-    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Generar PDF</button></div></form></dialog>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button class="primary" value="default">Generar PDF</button></div></form></dialog>
 
-  <dialog id="fotoModal"><div class="lightbox"><button class="close" id="fotoClose" aria-label="Cerrar">×</button><img id="fotoGrande" src="" alt="Foto del animal" /><div class="lightbox-info"><div><strong id="fotoNombre"></strong><span id="fotoDetalle"></span></div><button class="primary" id="fotoCartilla">Ver cartilla completa</button></div></div></dialog>
+  <dialog id="fotoModal"><div class="lightbox"><button class="close" id="fotoClose" aria-label="Cerrar">×</button><img id="fotoGrande" src="" alt="Foto del animal" /><div class="lightbox-info"><div><strong id="fotoNombre"></strong><span id="fotoDetalle"></span></div><button class="primary" id="fotoCartilla">Ver hoja de vida</button></div></div></dialog>
   <dialog id="modalPassword"><form id="formPassword" method="dialog"><div class="modal-header"><div><p class="eyebrow">Seguridad</p><h2>Cambiar contraseña</h2></div><button type="button" class="close" data-close-dialog aria-label="Cerrar">×</button></div>
     <p id="passTarget" style="padding:0 25px;color:#4a564f;font-size:13px"></p>
     <div class="form-grid">
