@@ -852,3 +852,30 @@ td small { display: block; color: #97a29a; font-size: 10.5px; margin-top: 2px; }
   .cartilla-toolbar .secondary { width: 100%; }
 }
 
+
+/* ===== Corrección: tamaño fijo de la foto en "Hoja de vida" (Actualizar datos) ===== */
+#modalBovino .foto-animal-editor { display: flex; align-items: flex-start; gap: 18px; flex-wrap: wrap; }
+#modalBovino .foto-preview {
+  position: relative !important;
+  width: 132px !important;
+  height: 132px !important;
+  max-width: 132px !important;
+  max-height: 132px !important;
+  min-width: 132px;
+  overflow: hidden !important;
+  flex: 0 0 132px;
+  border-radius: 14px;
+}
+#modalBovino .foto-preview img {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+}
+#modalBovino .foto-preview img[hidden] { display: none !important; }
