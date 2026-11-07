@@ -1217,6 +1217,120 @@ function abrirFoto(id) {
 $('#fotoClose').addEventListener('click', () => document.getElementById('fotoModal').close());
 $('#fotoCartilla').addEventListener('click', () => { const id = $('#fotoNombre').dataset.id; document.getElementById('fotoModal').close(); $('#cartillaSelect').value = id; renderCartilla(); document.getElementById('hojaVidaPanel').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 
+/* ---------- Foto del animal ---------- */
+// Las fotos nuevas se guardan en el almacén binario del servidor con prefijo bov_.
+// Si el servidor no está disponible, se guarda una versión comprimida como data URL.
+let fotoAnimalActual = '';
+let fotoPreviewObjectURL = null;
+
+function liberarFotoPreview() {
+  if (fotoPreviewObjectURL) {
+    URL.revokeObjectURL(fotoPreviewObjectURL);
+    fotoPreviewObjectURL = null;
+  }
+}
+
+function pintarFotoPreview(src) {
+  liberarFotoPreview();
+  const img = $('#fotoBovinoPreview');
+  const vacio = $('#fotoBovinoSinFoto');
+  if (src) {
+    img.src = src;
+    img.hidden = false;
+    vacio.hidden = true;
+  } else {
+    img.removeAttribute('src');
+    img.hidden = true;
+    vacio.hidden = false;
+  }
+}
+
+function mostrarArchivoFoto(file) {
+  liberarFotoPreview();
+  fotoPreviewObjectURL = URL.createObjectURL(file);
+  const img = $('#fotoBovinoPreview');
+  img.src = fotoPreviewObjectURL;
+  img.hidden = false;
+  $('#fotoBovinoSinFoto').hidden = true;
+}
+
+function restaurarFotoActual() {
+  $('#quitarFotoBovino').checked = false;
+  pintarFotoPreview(fotoAnimalActual);
+  $('#fotoBovinoQuitarLabel').hidden = !fotoAnimalActual;
+}
+
+function prepararFotoBovino(b) {
+  fotoAnimalActual = (b && b.foto) || '';
+  const form = $('#formBovino');
+  if (form.elements.foto) form.elements.foto.value = '';
+  restaurarFotoActual();
+}
+
+function claveFotoAnimal(url) {
+  const m = String(url || '').match(/^\/api\/factura\/([A-Za-z0-9_\-]{1,80})(?:\?|$)/);
+  return m ? m[1] : '';
+}
+
+async function fotoAnimalGuardar(id, blob) {
+  const clave = 'bov_' + String(id).replace(/^bov_/, '');
+  if (servidorOK) {
+    try {
+      const r = await fetch('/api/factura/' + encodeURIComponent(clave), {
+        method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: blob
+      });
+      if (r.ok) return '/api/factura/' + encodeURIComponent(clave) + '?v=' + Date.now();
+    } catch (e) { /* se usa el respaldo local */ }
+  }
+  return blobADataURL(blob);
+}
+
+function blobADataURL(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = () => rej(new Error('No se pudo preparar la imagen.'));
+    r.readAsDataURL(blob);
+  });
+}
+
+async function fotoAnimalBorrar(url) {
+  const clave = claveFotoAnimal(url);
+  if (!clave || !servidorOK) return;
+  await fetch('/api/factura/' + encodeURIComponent(clave), { method: 'DELETE' }).catch(() => {});
+}
+
+$('#fotoBovinoInput').addEventListener('change', e => {
+  const archivo = e.target.files && e.target.files[0];
+  if (!archivo) { restaurarFotoActual(); return; }
+  if (archivo.type && !archivo.type.startsWith('image/')) {
+    e.target.value = '';
+    restaurarFotoActual();
+    alert('Solo se aceptan imágenes (JPG, PNG o WEBP).');
+    return;
+  }
+  if (archivo.size > 15 * 1024 * 1024) {
+    e.target.value = '';
+    restaurarFotoActual();
+    alert('La foto supera 15 MB. Usa una imagen más pequeña.');
+    return;
+  }
+  $('#quitarFotoBovino').checked = false;
+  mostrarArchivoFoto(archivo);
+  $('#fotoBovinoQuitarLabel').hidden = false;
+});
+
+$('#quitarFotoBovino').addEventListener('change', e => {
+  if (e.target.checked) {
+    $('#fotoBovinoInput').value = '';
+    pintarFotoPreview('');
+  } else {
+    restaurarFotoActual();
+  }
+});
+
+document.getElementById('modalBovino').addEventListener('close', liberarFotoPreview);
+
 /* ---------- Editar / eliminar animal ---------- */
 let idEditando = null;
 function abrirEdicion(id) {
@@ -1238,14 +1352,16 @@ function abrirEdicion(id) {
   f.elements.estado.value = b.estado || '';
   f.elements.potrero.value = b.id_potrero || '';
   f.elements.birth.value = b.birth || '';
+  prepararFotoBovino(b);
   document.getElementById('modalBovino').showModal();
 }
-function eliminarBovino(id) {
+async function eliminarBovino(id) {
   const b = bovino(id); if (!b) return;
   const relacionados = db.tratamientos.filter(t => t.id_bovino === id).length + db.eventos.filter(e => e.id_bovino === id).length + db.pesajes.filter(p => p.id_bovino === id).length;
   const etiqueta = b.name ? b.name + ' (#' + b.tag + ')' : 'Animal #' + b.tag;
   const msg = '¿Eliminar el registro de ' + etiqueta + '?' + (relacionados ? '\n\nTambién se borrarán ' + relacionados + ' registro(s) médicos y de producción asociados.' : '');
   if (!confirm(msg)) return;
+  await fotoAnimalBorrar(b.foto);
   db.bovinos = db.bovinos.filter(x => x.id_bovino !== id);
   db.tratamientos = db.tratamientos.filter(t => t.id_bovino !== id);
   db.eventos = db.eventos.filter(e => e.id_bovino !== id);
@@ -1265,6 +1381,7 @@ function openModal(id) {
     f.elements.sexo.value = 'Hembra';
     f.elements.estado.value = 'En Ordeño';
     f.elements.situacion.value = 'Activo';
+    prepararFotoBovino(null);
   }
   const d = document.getElementById(id); if (id === 'modalTratamiento') avisoTrat(); if (id === 'modalPesaje') avisoPesaje(); d.showModal();
 }
@@ -1290,35 +1407,66 @@ function avisoPesaje() {
 $('#pesBovinoSelect').addEventListener('change', avisoPesaje);
 
 /* ---------- Formularios ---------- */
-$('#formBovino').addEventListener('submit', e => {
+let guardandoBovino = false;
+$('#formBovino').addEventListener('submit', async e => {
   e.preventDefault();
-  const f = Object.fromEntries(new FormData(e.target));
+  if (guardandoBovino) return;
+  const form = e.target;
+  const f = Object.fromEntries(new FormData(form));
   const tag = clean(f.tag);
   if (!tag) { alert('El arete es obligatorio.'); return; }
   if (db.bovinos.some(b => clean(b.tag).toLowerCase() === tag.toLowerCase() && b.id_bovino !== idEditando)) { alert('Ese número de arete ya existe.'); return; }
+
+  const archivo = form.elements.foto.files[0];
+  if (archivo && archivo.type && !archivo.type.startsWith('image/')) return alert('Solo se aceptan imágenes (JPG, PNG o WEBP).');
+  if (archivo && archivo.size > 15 * 1024 * 1024) return alert('La foto supera 15 MB. Usa una imagen más pequeña.');
+
   const numero = valor => valor === '' || valor == null ? '' : Number(valor);
-  const datos = {
-    name: clean(f.name), tag,
-    id_raza: f.raza || '', sexo: clean(f.sexo), estado: clean(f.estado),
-    id_potrero: f.potrero || '', birth: f.birth || '', marca: clean(f.marca),
-    chip: clean(f.chip), color: clean(f.color), hierro: clean(f.hierro),
-    lote: clean(f.lote), situacion: clean(f.situacion), procedencia: clean(f.procedencia),
-    padre: clean(f.padre), madre: clean(f.madre),
-    ultimo_parto: f.ultimo_parto || '', ultimo_celo: f.ultimo_celo || '',
-    fecha_prenez: f.fecha_prenez || '', parto_esperado: f.parto_esperado || '',
-    reproductor: clean(f.reproductor), tipo_servicio: clean(f.tipo_servicio),
-    servicios: numero(f.servicios), partos: numero(f.partos), abortos: numero(f.abortos),
-    peso_kg: numero(f.peso_kg), peso_fecha: f.peso_fecha || '',
-    condicion_corporal: numero(f.condicion_corporal),
-    notas_salud: clean(f.notas_salud), observaciones: clean(f.observaciones)
-  };
-  if (idEditando) {
-    const b = bovino(idEditando); if (b) Object.assign(b, datos);
-  } else {
-    db.bovinos.unshift(Object.assign({ id_bovino: uid('bov') }, datos));
+  const bActual = idEditando ? bovino(idEditando) : null;
+  const idBov = idEditando || uid('bov');
+  const boton = form.querySelector('button[value=default]');
+  const textoBoton = boton ? boton.textContent : '';
+  guardandoBovino = true;
+  if (boton) { boton.disabled = true; boton.textContent = 'Guardando…'; }
+
+  try {
+    let foto = bActual ? (bActual.foto || '') : '';
+    if (archivo) {
+      const blob = await comprimirImagen(archivo, 1200, 0.78);
+      foto = await fotoAnimalGuardar(idBov, blob);
+    } else if (form.elements.quitar_foto.checked) {
+      await fotoAnimalBorrar(foto);
+      foto = '';
+    }
+
+    const datos = {
+      name: clean(f.name), tag, foto,
+      id_raza: f.raza || '', sexo: clean(f.sexo), estado: clean(f.estado),
+      id_potrero: f.potrero || '', birth: f.birth || '', marca: clean(f.marca),
+      chip: clean(f.chip), color: clean(f.color), hierro: clean(f.hierro),
+      lote: clean(f.lote), situacion: clean(f.situacion), procedencia: clean(f.procedencia),
+      padre: clean(f.padre), madre: clean(f.madre),
+      ultimo_parto: f.ultimo_parto || '', ultimo_celo: f.ultimo_celo || '',
+      fecha_prenez: f.fecha_prenez || '', parto_esperado: f.parto_esperado || '',
+      reproductor: clean(f.reproductor), tipo_servicio: clean(f.tipo_servicio),
+      servicios: numero(f.servicios), partos: numero(f.partos), abortos: numero(f.abortos),
+      peso_kg: numero(f.peso_kg), peso_fecha: f.peso_fecha || '',
+      condicion_corporal: numero(f.condicion_corporal),
+      notas_salud: clean(f.notas_salud), observaciones: clean(f.observaciones)
+    };
+    if (idEditando) {
+      const b = bovino(idEditando); if (b) Object.assign(b, datos);
+    } else {
+      db.bovinos.unshift(Object.assign({ id_bovino: idBov }, datos));
+    }
+    idEditando = null;
+    save(); form.reset(); document.getElementById('modalBovino').close(); renderAll();
+  } catch (err) {
+    alert('No se pudo guardar la foto: ' + err.message);
+  } finally {
+    guardandoBovino = false;
+    if (boton) { boton.disabled = false; boton.textContent = textoBoton; }
   }
-  idEditando = null;
-  save(); e.target.reset(); document.getElementById('modalBovino').close(); renderAll();
 });
 
 $('#formTratamiento').addEventListener('submit', e => {
@@ -1448,16 +1596,21 @@ async function fotoBorrar(id) {
 const leerComoDataURL = file => new Promise((res, rej) => {
   const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file);
 });
-// Reduce la foto a 1600 px máximo y la guarda como JPEG: se ve bien y ocupa poco espacio.
-async function comprimirFactura(file) {
+// Reduce la imagen al lado máximo indicado y la guarda como JPEG: se ve bien y ocupa poco espacio.
+async function comprimirImagen(file, maxLado = 1600, calidad = 0.82) {
   const dataUrl = await leerComoDataURL(file);
   const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('imagen no válida')); i.src = dataUrl; });
-  const escala = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+  const escala = Math.min(1, maxLado / Math.max(img.naturalWidth, img.naturalHeight));
   const c = document.createElement('canvas');
-  c.width = Math.round(img.naturalWidth * escala); c.height = Math.round(img.naturalHeight * escala);
-  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-  return new Promise(res => c.toBlob(res, 'image/jpeg', 0.82));
+  c.width = Math.max(1, Math.round(img.naturalWidth * escala));
+  c.height = Math.max(1, Math.round(img.naturalHeight * escala));
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.drawImage(img, 0, 0, c.width, c.height);
+  return new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('No se pudo procesar la imagen.')), 'image/jpeg', calidad));
 }
+function comprimirFactura(file) { return comprimirImagen(file, 1600, 0.82); }
 
 const esAdminActual = () => esAdmin();
 const pesos = n => '$ ' + Number(n || 0).toLocaleString('es-CO');

@@ -266,6 +266,20 @@
   </div>
   <dialog id="modalBovino" class="modal-hoja-vida"><form id="formBovino" method="dialog"><div class="modal-header"><div><p class="eyebrow" id="eyebrowBovino">Nuevo registro</p><h2 id="tituloBovino">Registrar animal</h2></div><button class="close" type="button" data-close-dialog aria-label="Cerrar">×</button></div>
     <div class="form-seccion">
+      <h3>Foto del animal</h3>
+      <div class="foto-animal-editor">
+        <div class="foto-preview">
+          <img id="fotoBovinoPreview" alt="Foto del animal" hidden />
+          <span id="fotoBovinoSinFoto">Sin foto</span>
+        </div>
+        <div class="foto-campos">
+          <label>Seleccionar foto<input id="fotoBovinoInput" name="foto" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+          <small>JPG, PNG o WEBP. La imagen se ajusta automáticamente para ocupar poco espacio.</small>
+          <label class="foto-quitar" id="fotoBovinoQuitarLabel" hidden><input type="checkbox" name="quitar_foto" id="quitarFotoBovino" /> Quitar foto</label>
+        </div>
+      </div>
+    </div>
+    <div class="form-seccion">
       <h3>Identificación y manejo</h3>
       <div class="form-grid hoja-vida-grid">
         <label>Nombre<input name="name" placeholder="Ej. Canela" /></label>

@@ -6,7 +6,7 @@ Funciona en el equipo de la finca con un servidor Python que sirve la página y 
 
 ## Funcionalidades
 
-- **Inventario**: ficha por animal, foto, raza, estado, potrero, edad y hoja de vida con el histórico médico, reproductivo y datos productivos. La hoja de vida permite actualizar identificación, genealogía, situación, fechas reproductivas, peso, condición corporal y notas.
+- **Inventario**: ficha por animal, foto, raza, estado, potrero, edad y hoja de vida con el histórico médico, reproductivo y datos productivos. La hoja de vida permite actualizar identificación, genealogía, situación, fechas reproductivas, peso, condición corporal y notas, y agregar o reemplazar la foto del animal desde el mismo formulario.
 - **Salud**: tratamientos, vacunas, medicamentos y control automático de los días de retiro ICA (leche suspendida).
 - **Reproducción**: celos, inseminaciones, montas, partos y estimación de la fecha de parto.
 - **Producción**: pesajes de leche, entregas a Colanta, calidad UFC y promedio por vaca.
@@ -59,6 +59,7 @@ Para activar el envío real, copia `correo_config.example.json` como `correo_con
 
 - La base principal es `datos/proganado.sqlite3` y está excluida de Git.
 - Las fotos de facturas se guardan en la misma base SQLite cuando el servidor está activo; sin servidor se usa IndexedDB del navegador.
+- Las fotos nuevas de animales se guardan en el almacén binario del servidor con el prefijo `bov_`. Si el servidor no está disponible, se guarda una versión comprimida junto al registro en `localStorage`.
 - También se conserva una copia de trabajo en `localStorage` para que la app siga funcionando si el servidor no responde.
 - Para respaldar: detén el servidor y copia la carpeta `datos/` y, si usas la app sin servidor, exporta la información desde el navegador.
 - No borres `datos/proganado.sqlite3` al actualizar el código.

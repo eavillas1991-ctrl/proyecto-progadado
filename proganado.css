@@ -650,6 +650,97 @@ td small { display: block; color: #97a29a; font-size: 10.5px; margin-top: 2px; }
   text-transform: uppercase;
   letter-spacing: .09em;
 }
+.foto-animal-editor {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.foto-preview {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px dashed #cfdbd2;
+  border-radius: 14px;
+  background: #f4f8f2;
+}
+.foto-preview img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.foto-preview img[hidden] { display: none; }
+.foto-preview span {
+  padding: 12px;
+  color: #839289;
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+}
+.foto-campos {
+  flex: 1 1 280px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.foto-campos > label:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #617068;
+  font-size: 11px;
+  font-weight: 700;
+}
+.foto-campos input[type=file] {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  border: 1px solid #dce2dc;
+  border-radius: 6px;
+  padding: 8px;
+  background: #fff;
+  color: #4f5f56;
+  font: 12px inherit;
+}
+.foto-campos input[type=file]::file-selector-button {
+  margin-right: 10px;
+  border: 0;
+  border-radius: 5px;
+  padding: 6px 10px;
+  background: #e5f0e8;
+  color: #1e6b4d;
+  font: 600 11px inherit;
+  cursor: pointer;
+}
+.foto-campos small {
+  display: block;
+  color: #7b8981;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.foto-quitar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #8a5a3a;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.foto-quitar[hidden] { display: none; }
+.foto-quitar input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--red);
+}
 .form-grid.hoja-vida-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 13px 15px;
@@ -753,6 +844,10 @@ td small { display: block; color: #97a29a; font-size: 10.5px; margin-top: 2px; }
   .form-grid.hoja-vida-grid { grid-template-columns: 1fr; }
   .form-grid.hoja-vida-grid .span-3 { grid-column: auto; }
   .hoja-datos { grid-template-columns: 1fr; }
+  .foto-animal-editor { gap: 12px; }
+  .foto-preview { width: 112px; height: 112px; }
+  .foto-campos { flex-basis: 100%; }
+  .foto-campos input[type=file] { max-width: none; }
   .cartilla-toolbar select { flex: none; width: 100%; max-width: none; }
   .cartilla-toolbar .secondary { width: 100%; }
 }
