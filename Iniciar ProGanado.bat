@@ -1,10 +1,10 @@
-# ============================================================
-#  ProGanado — arranque con un solo click
-#  Inicia el servidor local (página + códigos de seguridad)
-#  y abre la página en tu navegador.
-# ============================================================
 @echo off
-title ProGanado — Servidor
+REM ============================================================
+REM  ProGanado - arranque con un solo click
+REM  Inicia el servidor local (pagina + codigos de seguridad)
+REM  y abre la pagina en tu navegador.
+REM ============================================================
+title ProGanado - Servidor
 cd /d "%~dp0"
 echo.
 echo   Iniciando ProGanado...

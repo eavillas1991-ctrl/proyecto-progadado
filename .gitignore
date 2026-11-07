@@ -1,4 +1,24 @@
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+venv/
+
+# Datos locales y configuracion sensible
+datos/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.db
+*.db-shm
+*.db-wal
+correo_config.json
+correo_config.local.json
+.env
+
+# Herramientas y temporales
+.freebuff/
+node_modules/
+*.log
 Thumbs.db
 Desktop.ini

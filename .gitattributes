@@ -1,0 +1,21 @@
+# Normaliza los finales de linea para evitar ruido entre Windows/Linux/macOS.
+* text=auto
+
+*.bat text eol=crlf
+*.py text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.gitignore text eol=lf
+*.gitattributes text eol=lf
+
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.avif binary
+*.woff2 binary
+*.ttf binary
+*.pdf binary

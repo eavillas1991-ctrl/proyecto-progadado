@@ -3,27 +3,23 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'" />
   <meta name="referrer" content="no-referrer" />
   <title>ProGanado · Gestión Ganadera</title>
   <link rel="icon" type="image/png" href="assets/proganado-logo.png" />
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="enhancements.css" />
-  <link rel="stylesheet" href="funciones.css" />
-  <link rel="stylesheet" href="auth.css?v=10" />
-  <link rel="stylesheet" href="login-moderno.css?v=1" />
+  <link rel="stylesheet" href="proganado.css" />
 </head>
-<body>
+<body class="modo-login">
 
   <!-- ===================== LOGIN ===================== -->
   <div id="loginView">
     <div class="login-card">
       <div class="login-hero">
         <img src="assets/proganado-logo-blanco.png" alt="ProGanado, Gestión Ganadera" />
-        <h2>La información de tu hato,<br>protegida.</h2>
+        <h2>Control total y seguro de tu operación ganadera.</h2>
         <p>Acceso exclusivo para el equipo de la finca.</p>
       </div>
-      <form class="login-form" id="formLogin" novalidate onsubmit="event.preventDefault();">
+      <form class="login-form" id="formLogin" novalidate>
         <h1>Iniciar sesión</h1>
         <p>Ingresa tus credenciales para entrar al sistema.</p>
         <div id="pasoCredenciales">
@@ -40,9 +36,38 @@
           </div>
         </div>
 
+        <div id="pasoCodigo" style="display:none">
+          <div class="login-field">
+            <label for="loginCodigo">Código de seguridad</label>
+            <input id="loginCodigo" inputmode="numeric" pattern="\d{6}" maxlength="6" autocomplete="one-time-code" placeholder="● ● ● ● ● ●" required />
+          </div>
+          <p class="codigo-acciones"><button type="button" class="link-btn" id="btnReenviar">Reenviar código</button> · <button type="button" class="link-btn" id="btnVolverPaso1">Cambiar cuenta</button></p>
+          <p class="modo-prueba" id="modoPruebaAviso" style="display:none">Modo prueba — tu código es: <b></b></p>
+        </div>
+
+        <div id="pasoConfig" style="display:none">
+          <p style="font-size:12px;color:#d8f5e3;margin:0 0 14px;line-height:1.45;text-align:left">No hay cuentas registradas. Crea la cuenta administradora; su correo recibirá los códigos de seguridad.</p>
+          <div class="login-field">
+            <label for="setupName">Nombre del administrador</label>
+            <input id="setupName" type="text" autocomplete="name" placeholder="Ej. María Pérez" required />
+          </div>
+          <div class="login-field">
+            <label for="setupUser">Correo (usuario)</label>
+            <input id="setupUser" type="email" autocomplete="username" placeholder="Ej. nombre@gmail.com" required />
+          </div>
+          <div class="login-field">
+            <label for="setupPass">Contraseña</label>
+            <input id="setupPass" type="password" autocomplete="new-password" placeholder="Mín. 8, letras y números" required />
+          </div>
+          <div class="login-field">
+            <label for="setupPass2">Confirmar contraseña</label>
+            <input id="setupPass2" type="password" autocomplete="new-password" placeholder="••••••••" required />
+          </div>
+        </div>
+
         <!-- AVISO LEGAL Y TRATAMIENTO DE DATOS (TEXTO LEGIBLE) -->
       <div class="login-terms" style="margin: 14px 0 8px; font-size: 12px; color: #ffffff; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.6);">
-       Al continuar, aceptas la <a href="#" id="linkPrivacidadLogin" onclick="document.getElementById('modalPrivacidad').showModal(); return false;" style="color: #81c784; text-decoration: underline; font-weight: bold;">Política de Tratamiento de Datos Personales</a>.
+       Al continuar, aceptas la <a href="#" id="linkPrivacidadLogin" data-open-privacy style="color: #81c784; text-decoration: underline; font-weight: bold;">Política de Tratamiento de Datos Personales</a>.
 </div>
 
         <button type="submit" id="btnLogin">Entrar</button>
@@ -62,12 +87,13 @@
         <button class="nav-item" data-page="reproduccion"><span>♡</span> Reproducción</button>
         <button class="nav-item" data-page="produccion"><span>◒</span> Producción</button>
         <button class="nav-item" data-page="movimientos"><span>↔</span> Potreros PRV</button>
+        <button class="nav-item" data-page="contabilidad"><span>$</span> Contabilidad</button>
         <button class="nav-item users-icon" data-page="usuarios" id="navUsuarios"><span>♙</span> Usuarios</button>
       </nav>
       <div class="sidebar-bottom">
-        <span class="dot"></span> Datos guardados localmente
+        <span class="dot"></span> Datos guardados en este equipo
         <div style="margin-top: 6px;">
-          <a href="#" onclick="document.getElementById('modalPrivacidad').showModal(); return false;" style="color: #666; font-size: 11px; text-decoration: underline;">Políticas de Privacidad</a>
+          <a href="#" id="linkPrivacidadSidebar" data-open-privacy style="color: #666; font-size: 11px; text-decoration: underline;">Políticas de Privacidad</a>
         </div>
       </div>
     </aside>
@@ -103,7 +129,7 @@
             <div id="actividadReciente"></div>
           </section>
         </div>
-        <section class="visual-strip" aria-label="Galería de la finca"><div class="gallery-intro"><p class="eyebrow">Visión integral</p><h2>Una operación<br>bien gestionada.</h2><span>ProGanado conecta cada momento clave de la finca.</span></div><figure><img src="assets/foto-corral.jpg" alt="Ternero recién nacido junto a su madre" /><figcaption><small>NACIMIENTOS</small>Terneros recién nacidos, al cuidado de su madre</figcaption></figure><figure><img src="assets/foto-pastoreo.jpg" alt="Vaca identificada con arete amarillo" /><figcaption><small>TRAZABILIDAD</small>Identificación y control individual</figcaption></figure><figure><img src="assets/foto-ordenio.jpg" alt="Vaca Simmental en el potrero" /><figcaption><small>BIENESTAR</small>Vacas sanas y felices en pastura</figcaption></figure></section>
+        <section class="visual-strip" aria-label="Galería de la finca"><div class="gallery-intro"><p class="eyebrow">Visión integral</p><h2>Una operación<br>bien gestionada.</h2><span>ProGanado conecta cada momento clave de la finca.</span></div><figure><img src="assets/foto-corral.jpg" alt="Ternero recién nacido junto a su madre" /><figcaption><small>NACIMIENTOS</small>Terneros recién nacidos, al cuidado de su madre</figcaption></figure><figure><img src="assets/ganado-v4.jpg" alt="Vaca identificada con arete amarillo" /><figcaption><small>TRAZABILIDAD</small>Identificación y control individual</figcaption></figure><figure><img src="assets/foto-ordenio.jpg" alt="Vaca Simmental en el potrero" /><figcaption><small>BIENESTAR</small>Vacas sanas y felices en pastura</figcaption></figure></section>
       </section>
 
       <!-- ===================== GANADO ===================== -->
@@ -185,7 +211,27 @@
         </section>
       </section>
 
-      <!-- ===================== USUARIOS (solo admin) ===================== -->
+      <!-- ===================== CONTABILIDAD ===================== -->
+      <section id="contabilidad" class="page">
+        <div class="page-top banner"><div><p class="eyebrow">Finanzas</p><h2>Contabilidad</h2><span>Entradas y salidas de dinero, con la foto de cada factura.</span></div><div class="banner-actions"><button class="secondary" data-open-modal="modalReporte">⎙ Reporte PDF</button><button class="secondary" id="contabExport">⇩ Exportar CSV</button><button class="primary" data-open-modal="modalContab">+ Registrar movimiento</button></div></div>
+        <p class="estado-datos" id="estadoDatos">● Conectando con el servidor…</p>
+        <div class="metrics">
+          <article class="func-card"><span class="metric-icon green">＋</span><p>Entradas</p><strong id="cIng">$ 0</strong><small id="cIngN">0 registros</small></article>
+          <article class="func-card"><span class="metric-icon red">－</span><p>Salidas</p><strong id="cEgr">$ 0</strong><small id="cEgrN">0 registros</small></article>
+          <article class="func-card"><span class="metric-icon blue">=</span><p>Saldo</p><strong id="cSaldo">$ 0</strong><small>Entradas menos salidas</small></article>
+          <article class="func-card"><span class="metric-icon amber">▤</span><p>Sin factura</p><strong id="cSinFoto">0</strong><small>Movimientos sin foto adjunta</small></article>
+        </div>
+        <section class="panel table-panel">
+          <div class="panel-heading"><div><p class="eyebrow">Libro de movimientos</p><h2>Facturas y pagos</h2></div></div>
+          <div class="toolbar"><label>⌕ <input id="cBuscar" placeholder="Buscar por concepto, tercero o factura" /></label><select id="cTipo"><option value="Todos">Entradas y salidas</option><option>Entrada</option><option>Salida</option></select><input type="month" id="cMes" title="Filtrar por mes" /></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Tercero</th><th>Factura</th><th>Categoría</th><th>Método</th><th class="num">Valor</th><th>Factura</th><th></th></tr></thead>
+            <tbody id="cBody"></tbody>
+          </table></div>
+          <p class="empty" id="cVacio" style="display:none">Aún no hay movimientos. Registra la primera entrada o salida de dinero.</p>
+        </section>
+      </section>
+
       <section id="usuarios" class="page">
         <div class="page-top"><div><p class="eyebrow">Seguridad</p><h2>Usuarios del sistema</h2><span>Administra las cuentas con acceso a la información del hato.</span></div></div>
         <div class="limits-row">
@@ -295,20 +341,51 @@
     </div>
     <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Guardar potrero</button></div></form></dialog>
 
+  <dialog id="modalContab"><form id="formContab" method="dialog"><div class="modal-header"><div><p class="eyebrow">Contabilidad</p><h2>Registrar movimiento</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+    <div class="form-grid">
+      <label>Tipo<select name="tipo" required><option value="Entrada">Entrada de dinero (ingreso)</option><option value="Salida">Salida de dinero (gasto)</option></select></label>
+      <label>Fecha<input required name="fecha" type="date" /></label>
+      <label>Concepto<input required name="concepto" placeholder="Ej. Venta de leche semana 42" /></label>
+      <label>Tercero (cliente o proveedor)<input required name="tercero" placeholder="Ej. Colanta" /></label>
+      <label>Número de factura<input name="numero" placeholder="Ej. FE-000123" /></label>
+      <label>Categoría<select name="categoria"><option>Venta de leche</option><option>Venta de ganado</option><option>Otros ingresos</option><option>Alimentación</option><option>Medicamentos y sanidad</option><option>Insumos y potreros</option><option>Nómina</option><option>Servicios públicos</option><option>Transporte</option><option>Impuestos</option><option>Otros gastos</option></select></label>
+      <label>Valor (COP)<input required name="valor" type="number" min="1" step="1" placeholder="Ej. 850000" /></label>
+      <label>Método de pago<select name="metodo"><option>Transferencia</option><option>Efectivo</option><option>Nequi / Daviplata</option><option>Tarjeta</option><option>Cheque</option></select></label>
+      <label style="grid-column:1/-1">Foto de la factura (JPG, PNG o WEBP)<input name="foto" type="file" accept="image/*" /></label>
+      <label style="grid-column:1/-1">Notas<input name="notas" placeholder="Opcional" /></label>
+    </div>
+    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Guardar</button></div></form></dialog>
+
+  <dialog id="modalReporte"><form id="formReporte" method="dialog"><div class="modal-header"><div><p class="eyebrow">Contabilidad</p><h2>Reporte mensual en PDF</h2></div><button class="close" value="cancel" aria-label="Cerrar">×</button></div>
+    <div class="form-grid">
+      <label>Mes del reporte<input type="month" name="mes" required /></label>
+      <label>Nombre de la empresa<input name="empresa" placeholder="Ej. Hacienda San Pedro" /></label>
+      <label style="grid-column:1/-1;flex-direction:row;align-items:center;gap:8px"><input type="checkbox" name="anexo" checked /> Incluir anexo con las fotos de las facturas</label>
+    </div>
+    <p class="estado-datos">El PDF incluye los movimientos del mes, el resumen por categoría y el saldo.</p>
+    <div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Generar PDF</button></div></form></dialog>
+
   <dialog id="fotoModal"><div class="lightbox"><button class="close" id="fotoClose" aria-label="Cerrar">×</button><img id="fotoGrande" src="" alt="Foto del animal" /><div class="lightbox-info"><div><strong id="fotoNombre"></strong><span id="fotoDetalle"></span></div><button class="primary" id="fotoCartilla">Ver cartilla completa</button></div></div></dialog>
-  <dialog id="modalPrivacidad"><div class="modal-header"><div><p class="eyebrow">Política</p><h2>Tratamiento de Datos Personales</h2></div><button class="close" value="cancel" aria-label="Cerrar" onclick="this.closest('dialog').close()">×</button></div>
+  <dialog id="modalPassword"><form id="formPassword" method="dialog"><div class="modal-header"><div><p class="eyebrow">Seguridad</p><h2>Cambiar contraseña</h2></div><button type="button" class="close" data-close-dialog aria-label="Cerrar">×</button></div>
+    <p id="passTarget" style="padding:0 25px;color:#4a564f;font-size:13px"></p>
+    <div class="form-grid">
+      <label>Nueva contraseña (mín. 8, letras y números)<input required name="pass1" type="password" autocomplete="new-password" placeholder="••••••••" /></label>
+      <label>Confirmar contraseña<input required name="pass2" type="password" autocomplete="new-password" placeholder="••••••••" /></label>
+    </div>
+    <p class="form-msg" id="passMsg"></p>
+    <div class="modal-actions"><button type="button" class="secondary" data-close-dialog>Cancelar</button><button type="submit" class="primary">Guardar contraseña</button></div></form></dialog>
+
+  <dialog id="modalPrivacidad"><div class="modal-header"><div><p class="eyebrow">Política</p><h2>Tratamiento de Datos Personales</h2></div><button class="close" data-close-dialog aria-label="Cerrar">×</button></div>
     <div style="padding: 18px 25px 24px; font-size: 12.5px; line-height: 1.6; color: #4a564f; max-height: 60vh; overflow: auto;">
       <p><b>Responsable:</b> ProGanado · Gestión Ganadera.</p>
       <p><b>Finalidad:</b> identificar a los usuarios autorizados del sistema, mantener la sesión activa y registrar la actividad del hato con fines de trazabilidad operativa.</p>
-      <p><b>Datos tratados:</b> correo electrónico, nombre, rol y contraseñas cifradas. La información del hato se guarda únicamente en este equipo (almacenamiento local del navegador) y no se transmite a terceros.</p>
+      <p><b>Datos tratados:</b> correo electrónico, nombre, rol y contraseñas protegidas mediante hash y salt. La información del hato se guarda en este equipo (base de datos local del servidor y almacenamiento del navegador) y no se transmite a terceros.</p>
       <p><b>Conservación:</b> los datos permanecen mientras el usuario mantenga la cuenta; puede solicitar su eliminación en cualquier momento.</p>
       <p><b>Derechos:</b> conforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013, usted puede acceder, corregir, actualizar o suprimir sus datos, así revocar la autorización otorgada, escribiendo al encargado del sistema.</p>
       <p style="margin-top:18px">Al continuar aceptas el tratamiento de datos aquí descrito.</p>
-      <div class="modal-actions" style="padding: 14px 0 0"><button class="primary" value="default" onclick="this.closest('dialog').close()">Entendido</button></div>
+      <div class="modal-actions" style="padding: 14px 0 0"><button class="primary" data-close-dialog>Entendido</button></div>
     </div>
   </dialog>
-
-  <script src="auth.js?v=6"></script>
-  <script src="app.js?v=14"></script>
+  <script src="proganado.js"></script>
 </body>
 </html>
